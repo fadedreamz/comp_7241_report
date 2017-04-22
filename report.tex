@@ -1,0 +1,186 @@
+\documentclass{article}
+\begin{document}
+\section{Introduction}
+Decision trees are commonly used in operations research, specifically in decision analysis, to help identify a strategy most likely to reach a goal, but are also a popular tool in machine learning[1]. However running decision tree on large dataset sequentially takes a lot of time. So, the natural evolution to optimize the sequential algorithm is to introduce parallel decision tree algorithm. Unlike sequential algorithm, parallel algorithm sometimes often tied to the parallel architecture on which it runs. Again, parallel architectures are not easily exposed or available to the algorithm itself. Hadoop implements map-reduce paradigm on commodity hardware in a distributed environment. The map-reduce paradigm reduces the complexity of programming and coordination of each node separately.
+In this report, we explore an algorithm for decision tree, which can be implemented on hadoop, look into the performance and observe some analysis of it. Following section describes the organization of this paper.
+
+Firstly we will briefly cover about the map-reduce paradigm, how it works. This will give the reader a sense how an algorithm intended to be implemented on a map-reduce environment, should be approached.
+Next we will give a simplified overview of the hadoop architecture, how to set up a two node cluster.
+Next two section we will cover word counting and matrix multiplication algorithms which run on map-reduce environment in distributed manner to enable the reader to visualize how an algorithm works in the map-reduce paradigm.
+In the next section we will focus on our main problem, decision tree. We will go through the problem statement, current state of art and try to give an overview of the problem. Then we will look into the algorithm and how it works. Finally we provide the source code and results for empirical studies of the algorithm in future.
+In the closing sections, we will briefly go over possible future works and then draw the conclusion.
+
+\section{Mapreduce}
+Map-reduce paradigm was first published in 2004 by Google’s white paper. The idea behind it was to distribute large set of data to multiple workers, whom will work in parallel. After their work all the output are gathered and then another round of operation is performed to generate the final output. This kind of idea generally seems to be divide and conquer. Where large set of data is broken down and passed to initial workers. The operation performed by the initial worker is called map function, and trivially the workers are termed mapper. All the node executes the same mapper on a subset of the dataset and generate intermediate output. Then the output is grouped and passed to another set of worker. The operation performed by these worker are called reduce function, and the workers are termed reducer. So, from a high-level mapreduce paradigm has 3 steps
+Map
+Combine/Shuffle
+Reduce
+To be highly distributed, there is no state kept between mapper or reducer. Hence map-reduce model was designed to works only with {key, value} pair data. So, in a typical map-reduce program it takes in input data as {key,value} pair, perform map function to produce intermediate results containing a new {key, value} pairs, group the results from each mapper into {key, list{values}} and passes this new input to the reducer. Once the reducer performs the reduce operation a new {key,value} pair will be generated as output. Generally a programmer is concerned with the implementation of map and reduce function and let the default shuffle/combine operation to take place. However, generally implementation of this paradigm also supports different Combine/Shuffle operation for complex requirements.
+
+In the next section we discuss about an open source implementation of the map-reduce paradigm named Apache Hadoop.
+
+
+\section{Hadoop architecture}
+Hadoop is an open source implementation of the map-reduce paradigm. It is written in java. It generally supports any map/reduce implementation which runs on JVM (e,g java, scala), however it can also support other language implementation via streaming api. From a very high level, the main components of hapoods are -
+HDFS
+Task Manager
+Job Tracker
+Name node
+Data Node
+
+HDFS is the Hadoop Distributed File System, which makes sure the data replication on each of Datanode. So, any input or output written to HDFS by one node is available to any other node within that cluster. This abstracts the distributed programming complexities and let the programmer focus on actual algorithm.
+
+Task Manager in the hadoop framework is responsible for distributing the map-reduce application to appropriate data node. More generally speaking it’s main task is to distribute the map-reduce task in each of the node and track it’s status.
+
+Job Tracker generally runs in datanode. The main functionality of it to run the assigned map-reduce task in the node and report back it’s status to Task manager.
+
+Name node component defines the master node within the cluster. So, in the whole cluster there will be a single namenode.
+
+Data node component defines the slave nodes within the cluster. Each processing node will have a component as datanode.
+
+Basic architecture:
+Setting up hadoop nodes
+In the next two sections we will go over simple parallel algorithm followed by decision tree parallel algorithm. For each of the problem, details of the algorithm will be shown followed by the algorithm itself and finally implementation of it in hadoop.
+
+\section{Word count}
+\subsection{Problem Statement}
+Word count problem is the introductory program in map-reduce paradigm because it is very easy to parallelize and gives a very clear overview how it works.
+
+The problem word count can be defined as to count the repetetation of each word within a file. If the dataset is very large then the sequential algorithm will take much time to compute the counting as it will go through the dataset in O(N) where N is the number of words within that dataset.
+
+To use a parallel algorithm for it in map-reduce, first we have to think about how we can prepare our input \{key,value\} pair, what mapper should produce and how the reducer will calculate the final result.
+
+The input for this trivial problem does not need to be converted to anything special, infact the dataset used in sequential algorithm can be used as it is. This is because the dataset is automatically partitioned by the hadoop framework and passed as \{row\_id, split\_of\_dataset\} to each mapper.
+
+In the mapper function we just need to produce each word as key and generate a value of 1. As we are using each word as the key, the count of the key will be always 1.
+After each mapper completes it’s output, the shuffle/combine step will gather all the values with same key, group them and pass them to reducer.
+So, if a word, for example “HELLO” appeared 3 times in 3 mappers, each of them giving output as {HELLO, 1} then the reducer will have {HELLO, list{1, 1, 1}}. Now in each reducer, it just counts the number of 1 from the value and produces the final output as {key, value}. For example given above it will produce {HELLO, 3}
+
+\subsection{Algorithm}
+
+\IncMargin{1em}
+\begin{algorithm}
+\DontPrintSemicolon
+\SetKwInOut{Input}{input}\SetKwInOut{Output}{output}
+\SetKwFunction{emit}{emit}
+\Input{(row\_id, text\_split)}
+\Output{(word, 1)}
+\BlankLine
+\ForEach {$word\in text\_split$}{
+\emit(word, 1)
+}
+\caption{Word Count Mapper\label{IR}}
+\end{algorithm}
+\DecMargin{1em}
+
+\IncMargin{1em}
+\begin{algorithm}
+\DontPrintSemicolon
+\SetKwInOut{Input}{input}\SetKwInOut{Output}{output}
+\SetKwFunction{emit}{emit}
+\Input{(word, list(count))}
+\Output{(word, sum)}
+\BlankLine
+$sum\leftarrow $0\;
+\ForEach {$count\in list(count)$}{
+	$sum\leftarrow $sum $+$ $count$
+}
+\emit(word, sum)\;
+\caption{Word Count Reducer\label{IR}}
+\end{algorithm}
+\DecMargin{1em}
+
+\subsection{Source Code}
+\subsection{results}
+
+\section{Matrix multiplication}
+
+\subsection{Problem Statement}
+Matrix multiplication is a very common but highly practical operation. The problem of matrix multiplication is believed to be first formualized in 19th centuray, however proof does exists that it was being used even before that. There are many practical usage of large matrix multiplication, for example - simulation of galaxy systems, data analysis/mining, solving equations.
+Matrix multiplication can be defined to multiply two matrix A,B and generate resultant matrix C
+
+In order to parallelize the matrix multiplication on a map-reduce paradigm, it is required to figure out what should be the input format, what will be the intermediate output and how reducer will make the final result.
+
+In order to get a intuition of the problem approach, lets look at the output of the resultant matrix. At position C(0,0) it is given by A(0,0) * B(0,0) + A(0,1) * B(1,0) + A(0,2) * B(2,0) + …. A(0,Q) * B(Q,0) for a PXQ QXR matrix respectively.
+For A(0,1) is given by A(0,0) * B(0,1) + A(0,1) * B(1,1) + A(0,2) * B(2,1) + …. A(0,Q) * B(Q,1)
+More generally, C(i,j) = sum(k = 0 to Q) { A(i, k) * B(k, j) }
+
+So, from this it is evident that to compute A(0,0) a reducer needs all values from row(0) of A and all values from col(0) of B. Similarly it is also evident that to compute A(0, x) a reducer needs all values from row(0). And to compute C(x, 0) a reducer needs all values from col(0). This analysis provides hints on the mappers ouput.
+The map function needs to outpput for each value within a row(x) as I(x, 0), l(x, 1) … l(x,p) and for each value within col(y) matrix B it needs to produce I(0, y), I(1,y) … I(p, y).
+
+This gives us the base for the alogrithm on the map-reduce paradigm.
+\subsection{Algorithm}
+\IncMargin{1em}
+\begin{algorithm}[H]
+\DontPrintSemicolon
+\SetKwInOut{Input}{input}\SetKwInOut{Output}{output}
+\SetKwFunction{emit}{emit}
+\SetKwFunction{GetColumnSize}{GetColumnSize}
+\SetKwFunction{GetRowSize}{GetRowSize}
+\Input{(row\_id, (matrix\_id, i, j, value))}
+\Output{((a,b), (matrix\_id,j,value))}
+\BlankLine
+$Q\leftarrow \GetColumnSize($B)\;
+$P\leftarrow \GetRowSize($A)\;
+	\If{$matrix\_id\ equals\ $A}{
+		\For {$k\leftarrow\ $0$\ \KwTo $Q}{
+			\emit((i,k), (matrix\_id,j,value))
+		}
+	}
+	\ElseIf{$matrix\_id\ equals\ $B}{
+		\For {$k\leftarrow\ $0$\ \KwTo $P}{
+			\emit((k,j), (matrix\_id,i,value))
+		}
+	}
+\caption{Matrix Mul Mapper\label{IR}}
+\end{algorithm}
+\DecMargin{1em}
+
+\IncMargin{1em}
+\begin{algorithm}[H]
+\DontPrintSemicolon
+\SetKwInOut{Input}{input}\SetKwInOut{Output}{output}
+\SetKwFunction{emit}{emit}
+\SetKwFunction{GetColumnSize}{GetColumnSize}
+\Input{(a,b), list(matrix\_id, i, value)}
+\Output{((i,j), value)}
+\BlankLine
+$Q\leftarrow\ \GetColumnSize($A)\;
+sort\ list\ into\ M\ or\ N\ based\ on\ i\;
+$sum\leftarrow\ $0\;
+\For{$K\leftarrow\ $0$\ \KwTo\ $Q} {
+	$m_{ik}\leftarrow\ $0\;
+	$n_{kj}\leftarrow\ $0\;
+	\If{there\ is\ a\ value\ $K\ for\ $M} {
+		$m_{ik}\leftarrow\ $M\big[K\big]
+	}
+	\If{there\ is\ a\ value\ $K\ for\ $N} {
+		$n_{kj}\leftarrow\ $N\big[K\big]
+	}
+	$sum\leftarrow\ $sum $+$ ($m_{ik}$ $*$ $n_{kj}$)
+}
+
+\emit((i,k), sum)
+
+\caption{Matrix Mul Reducer\label{IR}}
+\end{algorithm}
+\DecMargin{1em}
+
+\section{Decision tree}
+
+Problem statement
+Related works/literature review
+Algorithm
+Source Code
+results/analysis
+Future direction
+Conclusion
+Reference
+
+
+[1] https://en.wikipedia.org/wiki/Decision\_tree
+
+Important
+
+http://codingwiththomas.blogspot.ca/2011/04/controlling-hadoop-job-recursion.html
+\end{document}
