@@ -3,6 +3,8 @@
 \usepackage{graphicx}
 \usepackage{xcolor}
 \usepackage{listings}
+\usepackage{float}
+\usepackage{commath}
 
 \definecolor{dkgreen}{rgb}{0,0.6,0}
 \definecolor{gray}{rgb}{0.5,0.5,0.5}
@@ -18,7 +20,7 @@
 
 \graphicspath{ {img/} }
 
-\title{Decision Tree and Parallel Algorithm on Hadoop}
+\title{Decision Tree on Hadoop}
 \author{Md. Nazmul Alam (40016332), Newman ()}
 
 \renewcommand\lstlistingname{Code Snippet}
@@ -407,12 +409,366 @@ In the tree growing part for map-reduce C45, \cite{c452017}, \cite{c45cn} and \c
 \BlankLine
 One major improvement was proposed in \cite{c45cn} by creating three special table to cache the calculation from previous step to the next step. According to their result, they claimed that with this modification they were able to outperform even with single node hadoop performance comparing with sequential algorithm. By using complex mapper and reducer, \cite{c452017} was able to reduce disk I/O overhead and thus increasing the overall algorithm performance. According to their claim, the proposed algorithm scales very well with commodity hardware.
 
+\subsection{Methodology}
+
+\subsection{Decision Tree Concept: Entropy}
+Generally, entropy refers to disorder or uncertainty. In Information theory, entropy is the expected value (average) of the information contained in each message. 'Messages' can be modeled by any flow of information \cite{wikientropy}. In plain sentence entropy can be viewed as the chaos within a message. To understand why entropy is valuable in selecting an attribute over other, it is important to develop the intution on why a certain attribute is picked. 
+
+For an attribute ${X}$ such that it has 2 positive classifier and 2 negative classifier denoted by ${X_{2,2}}$, it is very difficult to make any kind of decision based on the attribute. Where considering another attribute ${Y}$ such that it has 3 positive classifier and 2 negative classifier denoted by ${Y_{2,2}}$, it is possible to say that it has a higher probably to correctly capture the positive classifier. Again an attribute ${Z}$ such that it has 2 positive and 3 negative classifier denoted by ${Z_{2,3}}$, it is possible to say that it has a higher probability to correctly capture the negative classifier. This probablitiy of an outcome helps to capture the entropy of an attribute. Figure \ref{fig:entropy} provides a very good view how entropy behaves. At probablity 0.5 the entropy is highest, making difficult to predict the outcome, where at probablity  0 and 1 the entropy is minimum, making very easy to predict the outcome.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=200pt]{entropy}
+	\caption{Relationship between entropy and probabliity}
+	\label{fig:entropy}
+\end{figure}
+
+The equation for entropy is given by -
+\begin{equation}
+Entropy(a)\ = P(a)\ - \sum_{v \in values(C)}\log_{2}{P(a)}
+\end{equation}
+where C defines the set for classifier.
+  
+\subsection{Decision Tree Concept: Information Gain}
+In decision tree, information gain means the mutual information carried by an attribute comparing to the classifier\cite{wikiinfogain}. In plain english, it is generally measure of ``information'' of a particular value of an attribute in contrast with entropy. For example, if an attribute holds ${X,Y,Z}$ values, each with different outcome. Then by contrasting each of them against the entropy of whole set, we can conclude which attribute should be the best node to pick.
+
+The equation for information gain is given by -
+\begin{equation}
+IG(S, a)\ =\ Entropy(S)\ - \sum_{v \in values(a)}(\ \abs{x \in S\mid x_{a} = v}/\abs{T}\ ) * Entropy(x \in S\mid x_{a} = v)
+\end{equation}
+
+The goal is to pick the attribute with maximum information gain. 
+
 \subsection{Algorithm}
+
+\IncMargin{1em}
+\begin{algorithm}[H]
+\DontPrintSemicolon
+\SetKwInOut{Input}{input}\SetKwInOut{Output}{output}
+\SetKwFunction{emit}{emit}
+\Input{(row\_id, (${a_{j}}$), c)}
+\Output{(${a_{j}}$,(row\_id, c))}
+\BlankLine
+\emit(${a_{j}}$,(row\_id, c))
+\caption{Attribute Table Mapper\label{algo:atmap}}
+\end{algorithm}
+\DecMargin{1em}
+
+\IncMargin{1em}
+\begin{algorithm}[H]
+\DontPrintSemicolon
+\SetKwInOut{Input}{input}\SetKwInOut{Output}{output}
+\SetKwFunction{emit}{emit}
+\Input{(${a_{j}}$,list(row\_id, c))}
+\Output{(${a_{j}}$,$(row\_id, c, count)$)}
+\BlankLine
+$count\leftarrow$ 0\;
+\ForEach{$value \in$ list}{
+	$count\leftarrow count + 1$\;
+}
+\emit(${a_{j}}$,(row\_id, c, count))
+\caption{Attribute Table Reducer\label{algo:atred}}
+\end{algorithm}
+\DecMargin{1em}
+
+\IncMargin{1em}
+\begin{algorithm}[H]
+\DontPrintSemicolon
+\SetKwInOut{Input}{input}\SetKwInOut{Output}{output}
+\SetKwFunction{emit}{emit}
+\Input{(${a_{j}}$,$list(row\_id, c, count)$)}
+\Output{(${a_{j}}$,$(row\_id, c, count, all)$)}
+\BlankLine
+$all\leftarrow$ 0\;
+\ForEach{$value \in$ list}{
+	$all\leftarrow all + 1$\;
+}
+\emit(${a_{j}}$,(row\_id, count, all))
+\caption{Attribute Table Reducer 2\label{algo:atred}}
+\end{algorithm}
+\DecMargin{1em}
+
+\IncMargin{1em}
+\begin{algorithm}[H]
+\DontPrintSemicolon
+\SetKwInOut{Input}{input}\SetKwInOut{Output}{output}
+\SetKwFunction{emit}{emit}
+\SetKwFunction{Entropy}{Entropy}
+\SetKwFunction{InfoGain}{InfoGain}
+\SetKwFunction{SplitInfoGain}{SplitInfoGain}
+\Input{(${a_{j}}$,$list(row\_id, c, count, all)$)}
+\Output{(${a_{j}}$,$(InfoGain(a_{j}), SplitInfoGain(a_{j})))$}
+\BlankLine
+calc \Entropy(${a_{j}}$)\;
+calc \InfoGain(${a_{j}}$) = ${(count/all) * Entropy(a_{j})}$\;
+calc \SplitInfoGain(${a_{j}}$) = ${- (count/all) * \log_{2}{(count/all)}}$\;
+\emit(${a_{j}}$,$(InfoGain(a_{j}), SplitInfoGain(a_{j}))$)
+\caption{Attribute Selection Mapper\label{algo:atred}}
+\end{algorithm}
+\DecMargin{1em}
+
+\IncMargin{1em}
+\begin{algorithm}[H]
+\DontPrintSemicolon
+\SetKwInOut{Input}{input}\SetKwInOut{Output}{output}
+\SetKwFunction{emit}{emit}
+\SetKwFunction{Entropy}{Entropy}
+\SetKwFunction{InfoGain}{InfoGain}
+\SetKwFunction{SplitInfoGain}{SplitInfoGain}
+\Input{(${a_{j}}$,$(InfoGain(a_{j}), SplitInfoGain(a_{j})))$}
+\Output{(${a_{j}}$,$(GainRatio(a_{j})$)}
+\BlankLine
+$gainRatio\leftarrow$ 0.0f\;
+\ForEach{$value \in$ list}{
+	$gainRatio\leftarrow gainRatio + (InfoGain(a_{j})/SplitInfoGain(a_{j}))$ \;
+}
+\emit(${a_{j}}$,$(GainRatio(a_{j})$)
+\caption{Attribute Selection Reducer\label{algo:atred}}
+\end{algorithm}
+\DecMargin{1em}
+
+% algorithm for best attribute selection -->
+
+\IncMargin{1em}
+\begin{algorithm}[H]
+\DontPrintSemicolon
+\SetKwInOut{Input}{input}\SetKwInOut{Output}{output}
+\SetKwFunction{emit}{emit}
+\SetKwFunction{Entropy}{Entropy}
+\Input{(${a_{j}}$,$list(GainRatio(a_{j})$)}
+\Output{(${a_{best}}$, count)}
+\BlankLine
+$a_{best}\leftarrow$\ empty\;
+$maxGR\leftarrow 0$\;
+\ForEach{$(a_{j}, GainRatio(a_{j})) \in$ list}{
+	\If{$maxGR < GainRatio(a_{j})$}{
+		$maxGR\leftarrow GainRatio(a_{j})$\;
+		$a_{best}\leftarrow a_{j}$\;
+	}
+}
+\emit(${a_{best}}$,$count$)
+\caption{Attribute Selection Reducer 2\label{algo:atred}}
+\end{algorithm}
+\DecMargin{1em}
+
+% end of algorithm
+
+% algorithm for tree growing -->
+
+\IncMargin{1em}
+\begin{algorithm}[H]
+\DontPrintSemicolon
+\SetKwInOut{Input}{input}\SetKwInOut{Output}{output}
+\SetKwFunction{emit}{emit}
+\SetKwFunction{CreateSubNodeId}{CreateSubNodeId}
+\SetKwFunction{hash}{hash}
+\Input{(${a_{best}}$,$row\_id$)}
+\Output{($row\_id$, (node\_id, subnode\_id))}
+\BlankLine
+$node\_id\leftarrow$\ \hash(${a_{best}}$)\;
+\If{$node\_id$ already seen}{
+	\emit($row\_id$, $node\_id$, $empty$) 
+}
+\Else{
+	$subnode\_id\leftarrow \CreateSubNodeId()$\;
+	\emit($row\_id$, $node\_id$, $subnode\_id$)
+}
+\caption{Tree Grow Reducer\label{algo:atred}}
+\end{algorithm}
+\DecMargin{1em}
+
+% end of algorithm
+
 \subsection{Code Snippets}
+
+% attribute selection mapper code
+
+\begin{lstlisting}[caption={Attrib Table Mapper code snippet},label={lst:attrtblmap},style=MyJavaStyle]
+protected void map(LongWritable key, Text value, Context context)
+    throws IOException, InterruptedException {
+    String [] values = value.toString().split(" ");
+    String classifier = values[values.length - 1];
+    System.out.println(value.toString() + ", Class: " + classifier);
+    for(int i=0; i< values.length - 1; i++) {
+        // write output as {key,value} => {attribute, (row_id, classifier)}
+        Text outputValue = new Text();
+        Text outputKey = new Text();
+        outputKey.set(i+1 + " " + values[i]);
+        outputValue.set(key.toString() + " " + classifier);
+        context.write(outputKey, outputValue);
+    }
+}
+\end{lstlisting}
+
+% end of code snippet
+% attribute selection reducer code
+
+\begin{lstlisting}[caption={Attrib Table Reducer code snippet},label={lst:attrtblred},style=MyJavaStyle]
+protected void reduce(Text arg0, Iterable<Text> arg1, Context arg2)
+    throws IOException, InterruptedException {
+    HashMap<String, HashMap<String, Integer>> classifierCount = new HashMap<String, HashMap<String,Integer>>();
+		
+    String key = arg0.toString();
+		
+    for (Text text : arg1) {
+        String [] values = text.toString().split(" ");
+        if (classifierCount.containsKey(key)) {
+            if (classifierCount.get(key).containsKey(values[1])) {
+                classifierCount.get(key).put(values[1],
+                    classifierCount.get(key).get(values[1]) + 1);
+            } else {
+                    classifierCount.get(key).put(values[1], 1);
+            }
+        } else {
+            HashMap<String, Integer> val = new HashMap<String, Integer>();
+            val.put(values[1], 1);
+            classifierCount.put(key, val);
+        }
+    }
+		
+    for (String keyAttribute : classifierCount.keySet()) {
+        if (classifierCount.get(keyAttribute) != null) {
+            for (String keyClass : classifierCount.get(keyAttribute).keySet()) {
+                arg2.write(new Text(keyAttribute), new Text(keyClass + " " + classifierCount.get(keyAttribute).get(keyClass)));
+            }
+        }
+    }
+}
+\end{lstlisting}
+
+% end of code snippet
+
+%code snippet for attrib selection reducer 2
+\begin{lstlisting}[caption={Attrib Table Reducer 2 code snippet},label={lst:attrtblred2},style=MyJavaStyle]
+protected void reduce(Text arg0, Iterable<Text> arg1,
+    Context arg2)
+    throws IOException, InterruptedException {
+    long total = 0;
+    LinkedList<String> set = new LinkedList<String>();
+		 
+        for (Text text : arg1) {
+        StringTokenizer tok = new StringTokenizer(text.toString());
+        set.add(text.toString());
+        String [] values = new String[tok.countTokens()];
+        int i = 0;
+        while(tok.hasMoreTokens()) {
+            values[i++] = tok.nextToken().trim();
+        }
+
+        total += Long.parseLong(values[2]);
+    }
+		
+    for (String text : set) {
+        StringTokenizer tok = new StringTokenizer(text);
+        String [] values = new String[tok.countTokens()];
+        int i = 0;
+            while(tok.hasMoreTokens()) {
+                values[i++] = tok.nextToken().trim();
+            }
+        Text outputKey = new Text(arg0 + " " + values[0]);
+        Text outputValue = new Text(values[1] + " " + values[2] + " " + String.valueOf(total));
+        arg2.write(outputKey, outputValue);
+    }
+}
+\end{lstlisting}
+% end of code
+
+% code for best attribute selection mapper
+\begin{lstlisting}[caption={Attrib Selection Mapper code snippet},label={lst:attrselmap},style=MyJavaStyle]
+float calculateEntropy(String attribute, int cnt, int totalCount) {
+    float result = 0.0f;
+    float probability = ((float)cnt)/((float)totalCount);
+    float log2Prob = (float) (Math.log10(probability) / Math.log10(2));
+    return probability + log2Prob;
+}
+
+@Override
+protected void map(LongWritable key, Text value, Context context)
+throws IOException, InterruptedException {
+    StringTokenizer tok = new StringTokenizer(value.toString());
+    String [] tokens = new String[tok.countTokens()];
+    int i = 0;
+    while(tok.hasMoreTokens()) {
+        tokens[i++] = tok.nextToken().trim();
+    }
+    String strKey = tokens[0] + " " + tokens[1];
+    String classifier = tokens[2];
+    int cnt = Integer.parseInt(tokens[3]);
+    int totalCnt = Integer.parseInt(tokens[4]);
+    float entropy = calculateEntropy(strKey, cnt, totalCnt);
+    float probability = ((float)cnt)/((float)totalCnt);
+    float infoAttribute = probability * entropy;
+    float splitInfoAttribute =  (float) (probability * (Math.log10(probability) / Math.log10(2)) * -1.0f);
+		
+    Text outputValue = new Text();
+    outputValue.set(tokens[1] + " " + tokens[2] + " " + tokens[3] + " " + tokens[4] + " " + String.valueOf(entropy) + " " + String.valueOf(infoAttribute) + " " + String.valueOf(splitInfoAttribute));
+    context.write(new Text(tokens[0]), outputValue);
+}
+\end{lstlisting}
+%end of code
+
+% code snippet for best attribute selection reducer
+\begin{lstlisting}[caption={Attrib Selection Reducer code snippet},label={lst:attrselred},style=MyJavaStyle]
+protected void reduce(Text arg0, Iterable<Text> arg1, Context arg2)
+throws IOException, InterruptedException {
+    LinkedList<String> items = new LinkedList<String>();
+    for(Text t : arg1) {
+        items.add(t.toString());
+    }
+		
+    float gainRatio = 0.0f;
+		
+    for(String it : items) {
+        StringTokenizer strTok = new StringTokenizer(it);
+        String [] values = new String[strTok.countTokens()];
+        int i = 0;
+        while(strTok.hasMoreTokens()) {
+            values[i++] = strTok.nextToken().trim();
+        }
+        float entropy = Float.parseFloat(values[4]);
+        float gain = entropy - Float.parseFloat(values[5]);
+        gainRatio += gain / Float.parseFloat(values[6]);
+    }
+    arg2.write(arg0, new Text(String.valueOf(gainRatio)));
+}
+\end{lstlisting}
+%end of code
+
+% code snippet for best attribute selection reducer
+\begin{lstlisting}[caption={Attrib Selection Reducer 2 code snippet},label={lst:attrselred},style=MyJavaStyle]
+protected void reduce(Text arg0, Iterable<Text> arg1, Context arg2)
+throws IOException, InterruptedException {
+    LinkedList<String> items = new LinkedList<String>();
+    for(Text t : arg1) {
+        items.add(t.toString());
+    }
+		
+    String aBest = "";
+    float mGain = 0.0f;
+    int mCount = 0;
+		
+    for(String it : items) {
+        StringTokenizer strTok = new StringTokenizer(it);
+        String [] values = new String[strTok.countTokens()];
+        int i = 0;
+        while(strTok.hasMoreTokens()) {
+            values[i++] = strTok.nextToken().trim();
+        }
+        float gainRatio = Float.parseFloat(values[2]);
+        if (mGain < gainRatio) {
+	mGain = gainRatio;
+	aBest = values[0];
+	mCount = Integer.parseInt(values[1]);
+        }
+    }
+    arg2.write(new Text(aBest), new Text(String.ValueOf(mCount)));
+}
+\end{lstlisting}
+%end of code
+
 \subsection{Analysis}
-Future direction
-Conclusion
-Reference
+
+\subsection{Conclusion}
 
 \begin{thebibliography}{9}
 \bibitem{wikidt}
@@ -431,6 +787,12 @@ Prayag Surrendran, Redappa G Naidu, Dinesh R.
 \bibitem{hadoopap}
 Apache Hadoop.
 \textit http://hadoop.apache.org/
+\bibitem{wikientropy}
+Entropy.
+\textit https://en.wikipedia.org/wiki/Entropy\_\(information\_theory\)
+\bibitem{wikiinfogain}
+Information Gain.
+\textit https://en.wikipedia.org/wiki/Information\_gain\_in\_decision\_trees
 \end{thebibliography}
 
 http://codingwiththomas.blogspot.ca/2011/04/controlling-hadoop-job-recursion.html
