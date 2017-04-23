@@ -1,5 +1,5 @@
 \documentclass{article}
-\usepackage[]{algorithm2e}
+\usepackage[linesnumbered,lined,ruled,vlined]{algorithm2e}
 \begin{document}
 \section{Introduction}
 Decision trees are commonly used in operations research, specifically in decision analysis, to help identify a strategy most likely to reach a goal, but are also a popular tool in machine learning[1]. However running decision tree on large dataset sequentially takes a lot of time. So, the natural evolution to optimize the sequential algorithm is to introduce parallel decision tree algorithm. Unlike sequential algorithm, parallel algorithm sometimes often tied to the parallel architecture on which it runs. Again, parallel architectures are not easily exposed or available to the algorithm itself. Hadoop implements map-reduce paradigm on commodity hardware in a distributed environment. The map-reduce paradigm reduces the complexity of programming and coordination of each node separately.
