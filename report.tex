@@ -1,4 +1,5 @@
 \documentclass{article}
+\usepackage[]{algorithm2e}
 \begin{document}
 \section{Introduction}
 Decision trees are commonly used in operations research, specifically in decision analysis, to help identify a strategy most likely to reach a goal, but are also a popular tool in machine learning[1]. However running decision tree on large dataset sequentially takes a lot of time. So, the natural evolution to optimize the sequential algorithm is to introduce parallel decision tree algorithm. Unlike sequential algorithm, parallel algorithm sometimes often tied to the parallel architecture on which it runs. Again, parallel architectures are not easily exposed or available to the algorithm itself. Hadoop implements map-reduce paradigm on commodity hardware in a distributed environment. The map-reduce paradigm reduces the complexity of programming and coordination of each node separately.
@@ -16,7 +17,6 @@ Map
 Combine/Shuffle
 Reduce
 To be highly distributed, there is no state kept between mapper or reducer. Hence map-reduce model was designed to works only with {key, value} pair data. So, in a typical map-reduce program it takes in input data as {key,value} pair, perform map function to produce intermediate results containing a new {key, value} pairs, group the results from each mapper into {key, list{values}} and passes this new input to the reducer. Once the reducer performs the reduce operation a new {key,value} pair will be generated as output. Generally a programmer is concerned with the implementation of map and reduce function and let the default shuffle/combine operation to take place. However, generally implementation of this paradigm also supports different Combine/Shuffle operation for complex requirements.
-
 In the next section we discuss about an open source implementation of the map-reduce paradigm named Apache Hadoop.
 
 
