@@ -21,7 +21,7 @@
 \graphicspath{ {img/} }
 
 \title{Decision Tree on Hadoop}
-\author{Md. Nazmul Alam (40016332), Newman ()}
+\author{Md. Nazmul Alam (40016332), Newman (29469354)}
 
 \renewcommand\lstlistingname{Code Snippet}
 \renewcommand\lstlistlistingname{Code Snippets}
@@ -35,20 +35,20 @@
 \addtocontents{toc}{~\hfill\textbf{Page}\par}
 \newpage
 \section{Introduction}
-Decision trees are commonly used in operations research, specifically in decision analysis, to help identify a strategy most likely to reach a goal, but are also a popular tool in machine learning\cite{wikidt}. However running decision tree on large dataset sequentially takes a lot of time. So, the natural evolution to optimize the sequential algorithm is to introduce parallel decision tree algorithm. Unlike sequential algorithm, parallel algorithm sometimes often tied to the parallel architecture on which it runs. Again, parallel architectures are not easily exposed or available to the algorithm itself. Hadoop implements map-reduce paradigm on commodity hardware in a distributed environment. The map-reduce paradigm reduces the complexity of programming and coordination of each node separately.
+Decision trees are commonly used in operations research, specifically in decision analysis, to help identify a strategy most likely to reach a goal, but are also a popular tool in machine learning\cite{wikidt}. However running decision tree on large dataset sequentially takes a lot of time. So, the natural evolution to optimize the sequential algorithm is to introduce parallel decision tree algorithm. Unlike sequential algorithm, parallel algorithm sometimes often tied to the parallel architecture on which it runs. Again, parallel architectures are not easily exposed or available to the algorithm itself. Hadoop implements MapReduce paradigm on commodity hardware in a distributed environment. The MapReduce paradigm reduces the complexity of programming and coordination of each node separately.
 \BlankLine This report explores an algorithm for decision tree, which is implemented on hadoop, looks into the performance and covers some analysis of it. Following section describes the organization of this report.\BlankLine
 
-Firstly the report covers about the map-reduce paradigm itself and how it works. This will give the reader a sense how an algorithm, intended to be implemented on a map-reduce environment, should be approached.
+Firstly the report covers about the MapReduce paradigm itself and how it works. This will give the reader a sense how an algorithm, intended to be implemented on a MapReduce environment, should be approached.
 
 Next section will cover a simplified overview of the hadoop architecture and how to set up a two node cluster.
 
-Next two sections will cover map-reduce version of word counting and matrix multiplication algorithms to enable the reader to visualize how an algorithm works in the map-reduce paradigm.
+Next two sections will cover MapReduce version of word counting and matrix multiplication algorithms to enable the reader to visualize how an algorithm works in the MapReduce paradigm.
 
 In the next section the report focuses on the main problem, decision tree. The report goes through the problem statement, current state of art and tries to give an overview of the problem. Then the report will look into the algorithm and how it works. Finally it provides the algorithms and code snippets along with the results for empirical studies of the algorithm in future.
 In the closing sections, we will briefly go over possible future works and then draw the conclusion.
 
 \section{Map Reduce}
-Map reduce paradigm was first published in 2004 by Google’s white paper. The idea behind it was to distribute large set of data to multiple workers, whom will work in parallel. After their work all the output are gathered and then another round of operation is performed to generate the final output. This kind of idea generally seems to be divide and conquer. Where large set of data is broken down and passed to initial workers. The operation performed by the initial worker is called map function, and trivially the workers are termed mapper. All the node executes the same mapper on a subset of the dataset and generate intermediate output. Then the output is grouped and passed to another set of worker. The operation performed by these worker are called reduce function, and the workers are termed reducer. So, from a high-level mapreduce paradigm has 3 steps - 
+Map reduce paradigm was first published in 2004 by Google’s white paper. The idea behind it was to distribute large set of data to multiple workers, whom will work in parallel. After their work all the output are gathered and then another round of operation is performed to generate the final output. This kind of idea generally seems to be divide and conquer. Where large set of data is broken down and passed to initial workers. The operation performed by the initial worker is called map function, and trivially the workers are termed mapper. All the node executes the same mapper on a subset of the dataset and generate intermediate output. Then the output is grouped and passed to another set of worker. The operation performed by these worker are called reduce function, and the workers are termed reducer. So, from a high-level mapreduce paradigm has 3 steps -
 \begin{itemize}
 \item Map
 \item Combine/Shuffle
@@ -60,13 +60,13 @@ Map reduce paradigm was first published in 2004 by Google’s white paper. The i
 	\caption{Map Reduce Paradigm}
 	\label{fig:mrp}
 \end{figure}
-To be highly distributed, there is no state kept between mapper or reducer. Hence map-reduce model was designed to works only with {key, value} pair data. So, in a typical map-reduce program it takes in input data as {key,value} pair, perform map function to produce intermediate results containing a new {key, value} pairs, group the results from each mapper into {key, list{values}} and passes this new input to the reducer. Once the reducer performs the reduce operation a new {key,value} pair will be generated as output. Generally a programmer is concerned with the implementation of map and reduce function and let the default shuffle/combine operation to take place. However, generally implementation of this paradigm also supports different Combine/Shuffle operation for complex requirements.
-In the next section we discuss about an open source implementation of the map-reduce paradigm named Apache Hadoop.
+To be highly distributed, there is no state kept between mapper or reducer. Hence MapReduce model was designed to works only with {key, value} pair data. So, in a typical MapReduce program it takes in input data as {key,value} pair, perform map function to produce intermediate results containing a new {key, value} pairs, group the results from each mapper into {key, list{values}} and passes this new input to the reducer. Once the reducer performs the reduce operation a new {key,value} pair will be generated as output. Generally a programmer is concerned with the implementation of map and reduce function and let the default shuffle/combine operation to take place. However, generally implementation of this paradigm also supports different Combine/Shuffle operation for complex requirements.
+In the next section we discuss about an open source implementation of the MapReduce paradigm named Apache Hadoop.
 
 
 \section{Hadoop Architecture}
 \subsection {Overview}
-Hadoop is an open source implementation of the map-reduce paradigm. It is written in java. It generally supports any map/reduce implementation which runs on JVM (e,g java, scala), however it can also support other language implementation via streaming api. From a very high level, the main components of hapoods are -
+Hadoop is an open source implementation of the MapReduce paradigm. It is written in java. It generally supports any map/reduce implementation which runs on JVM (e,g java, scala), however it can also support other language implementation via streaming api. From a very high level, the main components of hapoods are -
 \begin{itemize}
 \item HDFS
 \item Task Manager
@@ -95,9 +95,9 @@ HDFS is the Hadoop Distributed File System, which makes sure the data replicatio
 	\label{fig:hdfs}
 \end{figure}
 
-Task Manager in the hadoop framework is responsible for distributing the map-reduce application to appropriate data node. More generally speaking it’s main task is to distribute the map-reduce task in each of the node and track it’s status.
+Task Manager in the hadoop framework is responsible for distributing the MapReduce application to appropriate data node. More generally speaking it’s main task is to distribute the MapReduce task in each of the node and track it’s status.
 
-Job Tracker generally runs in datanode. The main functionality of it to run the assigned map-reduce task in the node and report back it’s status to Task manager.
+Job Tracker generally runs in datanode. The main functionality of it to run the assigned MapReduce task in the node and report back it’s status to Task manager.
 
 Name node component defines the master node within the cluster. So, in the whole cluster there will be a single namenode.
 
@@ -106,7 +106,7 @@ Data node component defines the slave nodes within the cluster. Each processing 
 A very high level relationship between these component is shown in figure \ref{fig:hdfs} \cite{c452017}.
 
 \subsection{Setting Up Hadoop Cluster}
-This section provides a high level instruction on how to set up a hadoop cluster on linux system. At the time of writing this report, the stable version of apache hadoop was 2.7.3 \cite{hadoopap}. 
+This section provides a high level instruction on how to set up a hadoop cluster on linux system. At the time of writing this report, the stable version of apache hadoop was 2.7.3 \cite{hadoopap}.
 
 Hadoops binary distributions are pretty much self contained. The only dependencies hadoop have are Java SDK and SSH-server. So, in linux system one should install Java SDK (openjdk), ssh-server (e,g- openssh-server) and ssh-client (generally preinstalled). After downloading the binary distribution, it should be extracted and placed on the desired location (e,g /usr/local/hadoop). It is not required but recommended to create an user account (e,g - hduser) to sandbox the access of hadoop. In next section it is provided how to setup a single node hadoop. Once the individual single node are setup a simple configuration will easily link them to make a two node setup.
 
@@ -168,20 +168,25 @@ At this point multi node setup is complete, to start hadoop issue start-dfs.sh a
 
 \section{Word count}
 \subsection{Problem Overview}
-Word count problem is the introductory program in map-reduce paradigm because it is very easy to parallelize and gives a very clear overview how it works.
-\BlankLine The problem word count can be defined as to count the repetation of each word within a file. If the dataset is very large then the sequential algorithm will take much time to compute the counting as it will go through the dataset in O(N) where N is the number of words within that dataset.
-\BlankLine
-To use a parallel algorithm for it in map-reduce, it is important to think about how the input \{key,value\} pair should be prepared, what mapper should produce and how the reducer will calculate the final result.
-\BlankLine
-The input for this trivial problem does not need to be converted to anything special, in fact the dataset used in sequential algorithm can be used as it is. This is because the dataset is automatically partitioned by the hadoop framework and passed as \{row\_id, split\_of\_dataset\} to each mapper.
-\BlankLine
-In the mapper function it is sufficient to produce each word as key and generate a value of 1. This is because using any word as the key, the count of the key will be always 1. 
-\BlankLine After each mapper completes its output, the shuffle/combine step will gather all the values with same key, group them and pass them to reducer.
-\BlankLine
-So, if a word, for example ``HELLO'' appeared 3 times in 3 mappers, each of them giving output as \{HELLO, 1\}. Then the reducer will have \{HELLO, list\{1, 1, 1\}\}. Now in each reducer, it just counts the number of 1 from the value and produces the final output as \{key, value\}. For example given above it will produce \{HELLO, 3\}.
-
-\BlankLine In next section the algorithm is defined formally.
-
+Word count problem is an introductory program in MapReduce paradigm. It is very easy to parallelize and gives a very clear overview how MapReduce works.
+\BlankLine Word count as the name implies counts the number of unique words in a file, our implementation is case insenstive. If the dataset is very large then the sequential algorithm will take a long time to do the counting.
+To use a parallel algorithm for it in MapReduce, it is important to think about how the input \{key,value\} pair should be prepared. What the mapper should produce and how the reducer will consume this to calculate the final result.
+To fit this problem to the MapReduce pattern we start by creating a map function that can take the dataset and create a \{key,value\} pair.
+This can be done by taking each word in a the dataset and using that word as the key and the value as 1.
+ For example the sentence "A This is a a word". Would map to
+ \BlankLine \{"A", 1 \}
+\BlankLine \{"This", 1 \}
+\BlankLine \{"is", 1 \}
+\BlankLine \{"a", 1 \}
+\BlankLine \{"a", 1 \}
+\BlankLine \{"word", 1 \}
+\BlankLine The reduce part of the problem would take the \{key, value\} pairs and generate.
+\BlankLine \{"A", 1 \}
+\BlankLine \{"This", 1 \}
+\BlankLine \{"is", 1 \}
+\BlankLine \{"a", 2 \}
+\BlankLine \{"word", 1 \}
+\BlankLine In the section below we define the algorithm in psuedo code and one possible implementation in Python.
 \subsection{Algorithm}
 For mapper, the algorithm \ref{algo:wcmap} emits the word and count 1. In the reducer, the algorithm \ref{algo:wcred} emits the word and sum of the count.
 \BlankLine
@@ -216,23 +221,71 @@ $sum\leftarrow $0\;
 \caption{Word Count Reducer\label{algo:wcred}}
 \end{algorithm}
 \DecMargin{1em}
-
 \subsection{Source Code}
-\subsection{results}
+
+\begin{lstlisting}[caption={Word count mapper code},label={lst:mmmap},style=MyPythonStyle]
+	import sys
+
+
+	for line in sys.stdin:
+		keys = line.strip().split()
+		for key in keys:
+	        	value = 1
+	        	print( "%s\t%d" % (key, value) )
+
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Word count reducer code},label={lst:mmmap},style=MyPythonStyle]
+	import sys
+
+	last_key = None
+	running_total = 0
+	count_map  = {}
+
+	for input_line in sys.stdin:
+		input_line = input_line.strip()
+		this_key, value = input_line.split("\t", 1)
+		value = int(value)
+		count_map[this_key] = count_map.get(this_key,0) + value
+		if last_key is None :
+			last_key = this_key
+		if last_key != this_key:
+			print("%s\t%d" % (last_key, count_map.get(last_key,0)))
+			last_key = this_key
+
+
+	print("%s\t%d" % (last_key, count_map.get(last_key,0)))
+\end{lstlisting}
+
+\subsection{Analysis}
+\BlankLine The sequential algorithm is $\mathcal{O}(n)$ since we have to touch each word in order to count it, since we have n words this is $\mathcal{O}(n)$. For a parallel algorithm with $p$ processors and in each processor we count $\frac{n}{p}$ words. So this is $\mathcal{O}(\frac{n}{p})$.
+
+
+Parallel Algorithm Time, ${T_{p}}$ = $\mathcal{O}(\frac{n}{p})$
+
+Naive Sequential Algorithm, ${T_{s}}$ = $\mathcal{O}(n)$
+
+Number of processor, p = $p$
+
+Speedup, ${S = T_{s}/T_{p}}$ = $\frac{\mathcal{O}(\frac{n}{p})}{\mathcal{O}(n)}$ = $\mathcal{O}(1)$
+
+Efficiency, ${E = S/p}$ = $\frac{\mathcal{O}(1)}{p}$ = $\mathcal{O}(\frac{1}{p})$
+
+\subsection{Results}
 
 \section{Matrix multiplication}
 
 \subsection{Problem Overview}
 Matrix multiplication is a very common but highly practical operation. The problem of matrix multiplication is believed to be first formualized in 19th centuray, however proof does exists that it was being used even before that. There are many practical usage of large matrix multiplication, for example - simulation of galaxy systems, data analysis/mining, solving equations and many more.
 
-Matrix multiplication can be defined as the multiplication of two matrix ${A_{P*Q},B_{Q*R}}$ to generate resultant matrix ${C_{P*R}}$ where ${C_{(i,j)}}$ is defined as  
+Matrix multiplication can be defined as the multiplication of two matrix ${A_{P*Q},B_{Q*R}}$ to generate resultant matrix ${C_{P*R}}$ where ${C_{(i,j)}}$ is defined as
 \begin{equation}
 C_{(i,j)}\ =\ \sum_{k = 1}^{Q} A_{i, k} *  B_{k,j}
 \end{equation}
 
-In order to parallelize the matrix multiplication on a map-reduce paradigm, it is required to figure out -
+In order to parallelize the matrix multiplication on a MapReduce paradigm, it is required to figure out -
 \begin{itemize}
-\item The input format 
+\item The input format
 \item The intermediate output from mapper
 \item How reducer will make the final result
 \end{itemize}
@@ -350,7 +403,7 @@ protected void reduce(Text arg0, Iterable<Text> arg1, Context arg2) throws java.
             N.put(Integer.parseInt(values[1]), Float.parseFloat(values[2]));
         }
     }
-		
+
     float result = 0.0f;
     float m_ik, n_kj;
     for(int k=0; k < lim_k; k++) {
@@ -358,7 +411,7 @@ protected void reduce(Text arg0, Iterable<Text> arg1, Context arg2) throws java.
         n_kj = N.containsKey(k) ? N.get(k) : 0.0f;
         result += m_ik * n_kj;
     }
-		
+
     arg2.write(null, new Text(arg0.toString() + "," + String.valueOf(result)));
 }
 \end{lstlisting}
@@ -378,33 +431,33 @@ Number of processor, p = ${N^2}$, as there are ${N^2}$ values for a particular m
 
 Speedup, ${S = T_{s}/T_{p}}$ = ${O(N^3)/O(N)}$ = ${O(N^2)}$
 
-Efficiency, ${E = S/p}$ = ${O(N^2) / O(N^2)}$ = ${O(1)}$ 
+Efficiency, ${E = S/p}$ = ${O(N^2) / O(N^2)}$ = ${O(1)}$
 
 \subsection{Results}
-For the testing purpose, synthetic value for large matrix was generated using a program. The randomness of the values is dependent upon the pseudo random function provided by the Java library. In a two node hadoop cluster the map reduce application was ran.\BlankLine
+For the testing purpose, random values for large matrix was generated using a program. The randomness of the values is dependent upon the pseudo random function provided by the Java library. In a two node hadoop cluster the map reduce application was ran.\BlankLine
 
-In a $(50,50)$ A and B matrix the run time for map-reduce was approximately 2.5 seconds.
+In a $(50,50)$ A and B matrix the run time for MapReduce was approximately 2.5 seconds.
 
-In a $(2000,2000)$ A and B matrix the run time for map-reduce was approximately 6.7 seconds.
+In a $(2000,2000)$ A and B matrix the run time for MapReduce was approximately 6.7 seconds.
 
-It is apparant that in hadoop implementation of map-reduce, the disk I/O is the major bottleneck for the performance.
+It is apparant that in hadoop implementation of MapReduce, the disk I/O is the major bottleneck for the performance.
 
 \section{Decision tree}
 
 \subsection{Problem Overview}
 \subsection{Literature Review}
-There are not many work related to map-reduce based decision tree algorithm. 
-\BlankLine In sequential algorithm of C4.5 uses the Infomation Gain Ratio as the main bias for selecting an attribute for splitting. 
+There are not many work related to MapReduce based decision tree algorithm.
+\BlankLine In sequential algorithm of C4.5 uses the Infomation Gain Ratio as the main bias for selecting an attribute for splitting.
 
-In all literature this has been used but extended in various manner for map-reduce paradigm. In \cite{c452017} the information gain ratio was calculated from a single round of map and reduce function. While in \cite{c45cn} the information gain ratio was reduced from several map-reduce function which generated information gain and split information gain. In \cite {c45in} the information gain ratio is computed from the reduction of the map functions, however they write the information gain to a temporaray space which allows a special function to again compute the best attribute to split.
+In all literature this has been used but extended in various manner for MapReduce paradigm. In \cite{c452017} the information gain ratio was calculated from a single round of map and reduce function. While in \cite{c45cn} the information gain ratio was reduced from several MapReduce function which generated information gain and split information gain. In \cite {c45in} the information gain ratio is computed from the reduction of the map functions, however they write the information gain to a temporaray space which allows a special function to again compute the best attribute to split.
 
 \cite{c45in} suffers from the fact that in highly distributed manner it might not be the case that the temporary file is avaible to other node, leading to wrong value for information gain ratio selection. Even if limiting the mapper to step forward will increase the parallel time and thus reducing the overall speedup and efficiency of the algorithm. \cite{c45cn} uses a very simple approach, using a pipeline of multiple map and reduce to build up the best attribute selection. Although it is simple, it incurs a lots of disk I/O in current hadoop implementation. However in recent hadoop implementation various optimization of disk I/O should reduce the issue. \cite{c452017} uses a more complicated mapper and reducer to select the best attribute. Compare to other two implementation it is much more optimized in term of number of rounds and disk I/O requirements.
 
 \BlankLine
-As the recursion part of the C4.5 to select the subsequent best attribute, recursion of the map-reduce algorithm is done to slowly build up the solution. In \cite{c45cn}, the proposed mechanism used a pipelined version of several map-reduce application, each performing a specific tasks. In \cite{c452017} and \cite{c45in} proposed method do not use pipelined version instead they rely on complex mapper and reducer.
+As the recursion part of the C4.5 to select the subsequent best attribute, recursion of the MapReduce algorithm is done to slowly build up the solution. In \cite{c45cn}, the proposed mechanism used a pipelined version of several MapReduce application, each performing a specific tasks. In \cite{c452017} and \cite{c45in} proposed method do not use pipelined version instead they rely on complex mapper and reducer.
 
 \BlankLine
-In the tree growing part for map-reduce C45, \cite{c452017}, \cite{c45cn} and \cite{c45in} uses some variant of map-reduce random forest grow algorithm.
+In the tree growing part for MapReduce C45, \cite{c452017}, \cite{c45cn} and \cite{c45in} uses some variant of MapReduce random forest grow algorithm.
 
 \BlankLine
 One major improvement was proposed in \cite{c45cn} by creating three special table to cache the calculation from previous step to the next step. According to their result, they claimed that with this modification they were able to outperform even with single node hadoop performance comparing with sequential algorithm. By using complex mapper and reducer, \cite{c452017} was able to reduce disk I/O overhead and thus increasing the overall algorithm performance. According to their claim, the proposed algorithm scales very well with commodity hardware.
@@ -412,7 +465,7 @@ One major improvement was proposed in \cite{c45cn} by creating three special tab
 \subsection{Methodology}
 
 \subsection{Decision Tree Concept: Entropy}
-Generally, entropy refers to disorder or uncertainty. In Information theory, entropy is the expected value (average) of the information contained in each message. 'Messages' can be modeled by any flow of information \cite{wikientropy}. In plain sentence entropy can be viewed as the chaos within a message. To understand why entropy is valuable in selecting an attribute over other, it is important to develop the intution on why a certain attribute is picked. 
+Generally, entropy refers to disorder or uncertainty. In Information theory, entropy is the expected value (average) of the information contained in each message. 'Messages' can be modeled by any flow of information \cite{wikientropy}. In plain sentence entropy can be viewed as the chaos within a message. To understand why entropy is valuable in selecting an attribute over other, it is important to develop the intution on why a certain attribute is picked.
 
 For an attribute ${X}$ such that it has 2 positive classifier and 2 negative classifier denoted by ${X_{2,2}}$, it is very difficult to make any kind of decision based on the attribute. Where considering another attribute ${Y}$ such that it has 3 positive classifier and 2 negative classifier denoted by ${Y_{2,2}}$, it is possible to say that it has a higher probably to correctly capture the positive classifier. Again an attribute ${Z}$ such that it has 2 positive and 3 negative classifier denoted by ${Z_{2,3}}$, it is possible to say that it has a higher probability to correctly capture the negative classifier. This probablitiy of an outcome helps to capture the entropy of an attribute. Figure \ref{fig:entropy} provides a very good view how entropy behaves. At probablity 0.5 the entropy is highest, making difficult to predict the outcome, where at probablity  0 and 1 the entropy is minimum, making very easy to predict the outcome.
 
@@ -428,7 +481,7 @@ The equation for entropy is given by -
 Entropy(a)\ = P(a)\ - \sum_{v \in values(C)}\log_{2}{P(a)}
 \end{equation}
 where C defines the set for classifier.
-  
+
 \subsection{Decision Tree Concept: Information Gain}
 In decision tree, information gain means the mutual information carried by an attribute comparing to the classifier\cite{wikiinfogain}. In plain english, it is generally measure of ``information'' of a particular value of an attribute in contrast with entropy. For example, if an attribute holds ${X,Y,Z}$ values, each with different outcome. Then by contrasting each of them against the entropy of whole set, we can conclude which attribute should be the best node to pick.
 
@@ -437,7 +490,7 @@ The equation for information gain is given by -
 IG(S, a)\ =\ Entropy(S)\ - \sum_{v \in values(a)}(\ \abs{x \in S\mid x_{a} = v}/\abs{T}\ ) * Entropy(x \in S\mid x_{a} = v)
 \end{equation}
 
-The goal is to pick the attribute with maximum information gain. 
+The goal is to pick the attribute with maximum information gain.
 
 \subsection{Algorithm}
 
@@ -567,7 +620,7 @@ $maxGR\leftarrow 0$\;
 \BlankLine
 $node\_id\leftarrow$\ \hash(${a_{best}}$)\;
 \If{$node\_id$ already seen}{
-	\emit($row\_id$, $node\_id$, $empty$) 
+	\emit($row\_id$, $node\_id$, $empty$)
 }
 \Else{
 	$subnode\_id\leftarrow \CreateSubNodeId()$\;
@@ -607,9 +660,9 @@ protected void map(LongWritable key, Text value, Context context)
 protected void reduce(Text arg0, Iterable<Text> arg1, Context arg2)
     throws IOException, InterruptedException {
     HashMap<String, HashMap<String, Integer>> classifierCount = new HashMap<String, HashMap<String,Integer>>();
-		
+
     String key = arg0.toString();
-		
+
     for (Text text : arg1) {
         String [] values = text.toString().split(" ");
         if (classifierCount.containsKey(key)) {
@@ -625,7 +678,7 @@ protected void reduce(Text arg0, Iterable<Text> arg1, Context arg2)
             classifierCount.put(key, val);
         }
     }
-		
+
     for (String keyAttribute : classifierCount.keySet()) {
         if (classifierCount.get(keyAttribute) != null) {
             for (String keyClass : classifierCount.get(keyAttribute).keySet()) {
@@ -645,7 +698,7 @@ protected void reduce(Text arg0, Iterable<Text> arg1,
     throws IOException, InterruptedException {
     long total = 0;
     LinkedList<String> set = new LinkedList<String>();
-		 
+
         for (Text text : arg1) {
         StringTokenizer tok = new StringTokenizer(text.toString());
         set.add(text.toString());
@@ -657,7 +710,7 @@ protected void reduce(Text arg0, Iterable<Text> arg1,
 
         total += Long.parseLong(values[2]);
     }
-		
+
     for (String text : set) {
         StringTokenizer tok = new StringTokenizer(text);
         String [] values = new String[tok.countTokens()];
@@ -699,7 +752,7 @@ throws IOException, InterruptedException {
     float probability = ((float)cnt)/((float)totalCnt);
     float infoAttribute = probability * entropy;
     float splitInfoAttribute =  (float) (probability * (Math.log10(probability) / Math.log10(2)) * -1.0f);
-		
+
     Text outputValue = new Text();
     outputValue.set(tokens[1] + " " + tokens[2] + " " + tokens[3] + " " + tokens[4] + " " + String.valueOf(entropy) + " " + String.valueOf(infoAttribute) + " " + String.valueOf(splitInfoAttribute));
     context.write(new Text(tokens[0]), outputValue);
@@ -715,9 +768,9 @@ throws IOException, InterruptedException {
     for(Text t : arg1) {
         items.add(t.toString());
     }
-		
+
     float gainRatio = 0.0f;
-		
+
     for(String it : items) {
         StringTokenizer strTok = new StringTokenizer(it);
         String [] values = new String[strTok.countTokens()];
@@ -742,11 +795,11 @@ throws IOException, InterruptedException {
     for(Text t : arg1) {
         items.add(t.toString());
     }
-		
+
     String aBest = "";
     float mGain = 0.0f;
     int mCount = 0;
-		
+
     for(String it : items) {
         StringTokenizer strTok = new StringTokenizer(it);
         String [] values = new String[strTok.countTokens()];
@@ -782,7 +835,7 @@ Mu, Y., Liu, X., Yang, Z., \& Liu, X. (2017).
 Wei Dai, Wei Ji.
 \textit A MapReduce Implementation of C4.5 Decision Tree Algorithm.
 \bibitem{c45in}
-Prayag Surrendran, Redappa G Naidu, Dinesh R. 
+Prayag Surrendran, Redappa G Naidu, Dinesh R.
 \textit Implementation of C4.5 Algorithm Using Hadoop MapReduce Framework.
 \bibitem{hadoopap}
 Apache Hadoop.
