@@ -837,7 +837,7 @@ The complexity of the C4.5 algorithm is $\mathcal{O}(mn^{2})$ \cite{complexity}.
 The complexity of the MapReduce algorithm can be broken down job by job. We split the n instances on p processors.
 \ref{algo:atmap} has the complexity $\mathcal{O}(m)$ where $m$ is the number of features and we are mapping on the number of features.
 \ref{algo:atred} has the complexity $\mathcal{O}(\frac{mn}{p})$ where $m$ is the number of features and $n$ is the number of instances since we are mapping on the number of features and iteration on the number of instanes.
-\ref{algo:atred_2} has the complexity $\mathcal{O}(\frac{mn}{p})$ where $m$ is the number of features and $n$ is the number of instances since we are reducing on the number of instances times the number of features.
+\ref{algo:atred_2} has the complexity $\mathcal{O}(\frac{mn}{p})$ where $m$ is the number of features and $n$ is the number of instances since we are reducing on the number of instances multiplied by the number of features.
 \ref{algo:atmap_2} has the complexity $\mathcal{O}(\frac{n}{p})$ where $n$ is the number of instances, this is the complexity of entropy. \cite{complexity}
 \ref{algo:atred_3} has the complexity $\mathcal{O}(\frac{n}{p})$ since we are just consuming the reduce from the previous tasks. The list contains only 1 element.
 \ref{algo:atred_4} has the complexity $\mathcal{O}(\frac{n}{p})$ since we are just consuming the reduce from the previous tasks and finding the best attribute.
@@ -855,7 +855,8 @@ We repeat \ref{algo:atred_2} to\ref{algo:atred_5} n times so in the worst case w
 \BlankLine Efficiency, ${E = S/p}$ = $\frac{\mathcal{O}(1)}{p}$ = $\mathcal{O}(\frac{1}{p})$ as $p << N$
 
 \subsection{Conclusion}
-
+From the study of various papers and the implemntation of many algorithms we came to the conclusion most of the time sequential algorithms out perform MapReduce.
+MapReduce needs a lot of data in order to balance the trade off using a distributed computing. Our datasets was not large enough to take advantage of MapReduce.
 \begin{thebibliography}{9}
 \bibitem{wikidt}
 \textit https://en.wikipedia.org/wiki/Decision\_tree
