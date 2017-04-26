@@ -36,19 +36,19 @@
 \newpage
 \section{Introduction}
 Decision trees are commonly used in operations research, specifically in decision analysis, to help identify a strategy most likely to reach a goal, but are also a popular tool in machine learning\cite{wikidt}. However running decision tree on large dataset sequentially takes a lot of time. So, the natural evolution to optimize the sequential algorithm is to introduce parallel decision tree algorithm. Unlike sequential algorithm, parallel algorithm sometimes often tied to the parallel architecture on which it runs. Again, parallel architectures are not easily exposed or available to the algorithm itself. Hadoop implements MapReduce paradigm on commodity hardware in a distributed environment. The MapReduce paradigm reduces the complexity of programming and coordination of each node separately.
-\BlankLine This report explores an algorithm for decision tree, which is implemented on hadoop, looks into the performance and covers some analysis of it. Following section describes the organization of this report.\BlankLine
+\BlankLine This report explores an algorithm for the decision tree, which is implemented on Hadoop, looks into the performance and covers some analysis of it. The following section describes the organization of this report.\BlankLine
 
-Firstly the report covers about the MapReduce paradigm itself and how it works. This will give the reader a sense how an algorithm, intended to be implemented on a MapReduce environment, should be approached.
+Firstly the report covers about the MapReduce paradigm itself and how it works. This will give the reader a sense how an algorithm, intended to be implemented in a MapReduce environment, should be approached.
 
-Next section will cover a simplified overview of the hadoop architecture and how to set up a two node cluster.
+After the first section, the report covers a simplified overview of the Hadoop architecture and how to set up a two-node cluster.
 
-Next two sections will cover MapReduce version of word counting and matrix multiplication algorithms to enable the reader to visualize how an algorithm works in the MapReduce paradigm.
+After that, two sections cover MapReduce version of word counting and matrix multiplication algorithms to enable the reader to visualize how an algorithm works in the MapReduce paradigm.
 
-In the next section the report focuses on the main problem, decision tree. The report goes through the problem statement, current state of art and tries to give an overview of the problem. Then the report will look into the algorithm and how it works. Finally it provides the algorithms and code snippets along with the results for empirical studies of the algorithm in future.
-In the closing sections, we will briefly go over possible future works and then draw the conclusion.
+After giving the overview on MapReduce paradigm, the next section of the report focuses on the main problem, decision tree. The report goes through the problem statement, current state of art and gives an overview of the problem. Then the report looks into the algorithm and how it works. Finally, it provides the algorithms and code snippets along with the results to conduct empirical studies of the algorithm in future.
+In the closing sections, this report briefly goes over some of the possible future works and then draw the conclusion.
 
 \section{Map Reduce}
-Map reduce paradigm was first published in 2004 by Google’s white paper. The idea behind it was to distribute large set of data to multiple workers, whom will work in parallel. After their work all the output are gathered and then another round of operation is performed to generate the final output. This kind of idea generally seems to be divide and conquer. Where large set of data is broken down and passed to initial workers. The operation performed by the initial worker is called map function, and trivially the workers are termed mapper. All the node executes the same mapper on a subset of the dataset and generate intermediate output. Then the output is grouped and passed to another set of worker. The operation performed by these worker are called reduce function, and the workers are termed reducer. So, from a high-level mapreduce paradigm has 3 steps -
+Map reduce paradigm was first published in 2004 by Google in a white paper \cite{mrgoogle}. The idea behind it was to distribute large set of data to multiple workers, whom will work in parallel. After their work all the output are gathered and then another round of operation is performed to generate the final output. This kind of idea generally seems to be divide and conquer. Where large set of data is broken down and passed to initial workers. The operation performed by the initial worker is called map function, and trivially the workers are termed mapper. All the node executes the same mapper on a subset of the dataset and generate intermediate output. Then the output is grouped and passed to another set of worker. The operation performed by these worker are called reduce function, and the workers are termed reducer. The overall view can be understood from figure \ref{fig:mrp}. So, from a high-level mapreduce paradigm has 3 steps -
 \begin{itemize}
 \item Map
 \item Combine/Shuffle
@@ -834,6 +834,9 @@ throws IOException, InterruptedException {
 \begin{thebibliography}{9}
 \bibitem{wikidt}
 \textit https://en.wikipedia.org/wiki/Decision\_tree
+\bibitem{mrgoogle}
+Dean, J., \& Ghemawat, S. (2008).
+\textit MapReduce: simplified data processing on large clusters. Communications of the ACM, 51\(1\), 107-113.
 \bibitem{hadoopibm}
 \textit https://www.ibm.com/developerworks/library/bd-hadoopyarn/
 \bibitem{c452017}
