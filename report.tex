@@ -50,7 +50,7 @@ In the next section the report focuses on the main problem, decision tree. The r
 In the closing sections, we will briefly go over possible future works and then draw the conclusion.
 
 \section{Map Reduce}
-Map reduce paradigm was first published in 2004 by Google’s white paper. The idea behind it was to distribute large set of data to multiple workers, whom will work in parallel. After their work all the output are gathered and then another round of operation is performed to generate the final output. This kind of idea generally seems to be divide and conquer. Where large set of data is broken down and passed to initial workers. The operation performed by the initial worker is called map function, and trivially the workers are termed mapper. All the node executes the same mapper on a subset of the dataset and generate intermediate output. Then the output is grouped and passed to another set of worker. The operation performed by these worker are called reduce function, and the workers are termed reducer. So, from a high-level mapreduce paradigm has 3 steps -
+Map reduce paradigm was first published in 2004 by Google in a white paper \cite{mrgoogle}. The idea behind it was to distribute a large set of data to multiple workers, whom will work in parallel. After their work, all the output are gathered and then another round of operation is performed to generate the final output. This kind of idea generally seems to be divide and conquer. Where large set of data is broken down and passed to initial workers. The operation performed by the initial worker is called map function, and trivially the workers are termed mapper. All the node executes the same mapper on a subset of the dataset and generate intermediate output. Then the output is grouped and passed to another set of worker. The operation performed by these worker are called reduce function, and the workers are termed reducer. The overall view can be understood from figure \ref{fig:mrp} \cite{c452017}. So, from a high-level MapReduce paradigm has 3 steps -
 \begin{itemize}
 \item Map
 \item Combine/Shuffle
@@ -62,13 +62,13 @@ Map reduce paradigm was first published in 2004 by Google’s white paper. The i
 	\caption{Map Reduce Paradigm}
 	\label{fig:mrp}
 \end{figure}
-To be highly distributed, there is no state kept between mapper or reducer. Hence MapReduce model was designed to works only with {key, value} pair data. So, in a typical MapReduce program it takes in input data as {key,value} pair, perform map function to produce intermediate results containing a new {key, value} pairs, group the results from each mapper into {key, list{values}} and passes this new input to the reducer. Once the reducer performs the reduce operation a new {key,value} pair will be generated as output. Generally a programmer is concerned with the implementation of map and reduce function and let the default shuffle/combine operation to take place. However, generally implementation of this paradigm also supports different Combine/Shuffle operation for complex requirements.
-In the next section we discuss about an open source implementation of the MapReduce paradigm named Apache Hadoop.
+To be highly distributed, there is no state kept between mapper or reducer. Hence MapReduce model was designed to works only with {key, value} pair data. So, in a typical MapReduce program, it takes in input data as {key, value} pair, perform map function to produce intermediate results containing a new {key, value} pairs, group the results from each mapper into {key, list{values}} and passes this new input to the reducer. Once the reducer performs the reduce operation a new {key, value} pair will be generated as output. Generally, a programmer is concerned with the implementation of the map and reduce function and let the default shuffle/combine operation to take place. However, generally, implementation of this paradigm also supports different Combine/Shuffle operation for complex requirements.
 
+In the next section, this report provides a brief overview of the architecture of an open-source implementation of the MapReduce paradigm named Apache Hadoop.
 
 \section{Hadoop Architecture}
 \subsection {Overview}
-Hadoop is an open source implementation of the MapReduce paradigm. It is written in java. It generally supports any map/reduce implementation which runs on JVM (e,g java, scala), however it can also support other language implementation via streaming api. From a very high level, the main components of hapoods are -
+Hadoop is an open-source implementation of the MapReduce paradigm. It is written in java. It generally supports any map/reduce implementation which runs on JVM (e,g java, scala), however, it can also support other language implementation via streaming API (e,g Python). From a very high level, the main components of Hadoop are -
 \begin{itemize}
 \item HDFS
 \item Task Manager
@@ -77,7 +77,7 @@ Hadoop is an open source implementation of the MapReduce paradigm. It is written
 \item Data Node
 \end{itemize}
 
-The overall architecture is shown in figure \ref{fig:hadoop-arch}\cite{hadoopibm}.
+The overall architecture is shown in figure \ref{fig:hadoop-arch} \cite{hadoopibm}.
 
 \begin{figure}[h]
 	\centering
@@ -88,7 +88,7 @@ The overall architecture is shown in figure \ref{fig:hadoop-arch}\cite{hadoopibm
 
 \subsection {Basic Architecture}
 
-HDFS is the Hadoop Distributed File System, which makes sure the data replication on each of Datanode. So, any input or output written to HDFS by one node is available to any other node within that cluster. This abstracts the distributed programming complexities and let the programmer focus on actual algorithm.
+HDFS is the Hadoop Distributed File System, which performs the data replication on each of Datanode. So, any input or output written to HDFS by one node is available to any other node within that cluster. This abstracts the distributed programming complexities and lets the programmer focus on the actual algorithm.
 
 \begin{figure}[h]
 	\centering
@@ -97,23 +97,23 @@ HDFS is the Hadoop Distributed File System, which makes sure the data replicatio
 	\label{fig:hdfs}
 \end{figure}
 
-Task Manager in the hadoop framework is responsible for distributing the MapReduce application to appropriate data node. More generally speaking it’s main task is to distribute the MapReduce task in each of the node and track it’s status.
+Task Manager in the Hadoop framework is responsible for distributing the MapReduce application to the appropriate data node. More generally speaking its main task is to distribute the MapReduce task in each of the nodes and track its status.
 
-Job Tracker generally runs in datanode. The main functionality of it to run the assigned MapReduce task in the node and report back it’s status to Task manager.
+Job Tracker generally runs in data node. The main functionality of it to run the assigned MapReduce task in the node and report back it’s status to Task manager.
 
-Name node component defines the master node within the cluster. So, in the whole cluster there will be a single namenode.
+Name node component defines the master node within the cluster. So, in the whole cluster, there will be a single name node.
 
-Data node component defines the slave nodes within the cluster. Each processing node will have a component as datanode.
+Data node component defines the slave nodes within the cluster. Each processing node will have a component as a data node.
 
-A very high level relationship between these component is shown in figure \ref{fig:hdfs} \cite{c452017}.
+A very high-level relationship between this component is shown in figure \ref{fig:hdfs} \cite{c452017}.
 
 \subsection{Setting Up Hadoop Cluster}
-This section provides a high level instruction on how to set up a hadoop cluster on linux system. At the time of writing this report, the stable version of apache hadoop was 2.7.3 \cite{hadoopap}.
+This section provides a high-level instruction on how to set up a Hadoop cluster on a Linux system. At the time of writing this report, the stable version of apache Hadoop was 2.7.3 \cite{hadoopap}.
 
-Hadoops binary distributions are pretty much self contained. The only dependencies hadoop have are Java SDK and SSH-server. So, in linux system one should install Java SDK (openjdk), ssh-server (e,g- openssh-server) and ssh-client (generally preinstalled). After downloading the binary distribution, it should be extracted and placed on the desired location (e,g /usr/local/hadoop). It is not required but recommended to create an user account (e,g - hduser) to sandbox the access of hadoop. In next section it is provided how to setup a single node hadoop. Once the individual single node are setup a simple configuration will easily link them to make a two node setup.
+Hadoop binary distributions are pretty much self-contained. The only dependencies Hadoop have are Java SDK and SSH-server. So, in Linux system one should install Java SDK (OpenJDK), ssh-server (e,g- OpenSSH-server) and ssh-client (generally preinstalled). After downloading the binary distribution, it should be extracted and placed in the desired location (e,g /usr/local/hadoop). It is not required but recommended to create a user account (e,g - hduser) to sandbox the access of Hadoop. In next section, it is provided how to setup a single node Hadoop. Once the individual single node is setup, a simple configuration will easily link them to make a two node setup.
 
 \subsubsection {Single Node Setup}
-Following instruction should be completed to enable single node hadoop setup on a system -
+The following instruction should be completed to enable single node Hadoop setup on a system -
 \begin{itemize}
 \item Generate ssh public/private key pair. Install the key on hduser account to enable auto login without any password.
 \item Add HADOOP\_DIR, JAVA\_HOME in the environment variable
@@ -124,7 +124,7 @@ Following instruction should be completed to enable single node hadoop setup on 
   <value>hdfs://master:9000</value>
 </property>
 \end{lstlisting}
-\BlankLine Here the master is the IP address of the master node.
+\BlankLine Here the value of ``master'' is the IP address of the master node.
 \item Edit \$\{HADOOP\_DIR\}/etc/hadoop/hdfs-site.xml and add the following -\BlankLine
 \begin{lstlisting}[caption={Hadoop HDFS Config},label={lst:hdfssite},style=MyXMLStyle]
 <property>
@@ -144,7 +144,7 @@ Following instruction should be completed to enable single node hadoop setup on 
  <value>/usr/local/hadoop/hadoop_dir/datanode</value>
 </property>
 \end{lstlisting}
-\BlankLine The value for name.dir and data.dir are used for namenode and datanode respectively. So, it must be ensured that these directory existed.
+\BlankLine The value for ``name.dir'' and ``data.dir'' are used for name node and data node respectively. So, it must be ensured that these directories exist.
 
 \item Copy the \$\{HADOOP\_DIR\}/etc/hadoop/mapred-site.xml.template to \$\{HADOOP\_DIR\}/etc/hadoop/mapred-site.xml and add the following - \BlankLine
 \begin{lstlisting}[caption={Hadoop MapRed Config},label={lst:mapredsite},style=MyXMLStyle]
@@ -156,30 +156,30 @@ Following instruction should be completed to enable single node hadoop setup on 
 \item Format the namenode using hdfs tool provided in the hadoop distribution
 \end{itemize}
 
-At this point single node setup is complete, to start hadoop issue start-dfs.sh and start-yarn.sh subsequently.
+At this point single node setup is complete, to start Hadoop issue ``start-dfs.sh’’ and ``start-yarn.sh’’ subsequently.
 
 \subsubsection{Multi Node Setup}
-Following instruction should be completed to enable multi node hadoop setup -
+The following instruction should be completed to enable multi-node Hadoop setup -
 \begin{itemize}
 \item Add master ssh-pubkey to the trusted ssh-keys in the slaves. This enables autologin without any password.
-\item Make sure each node can run in single node setup
+\item Make sure each node can be run in single node setup
 \item Create a new file in the master node  \$\{HADOOP\_DIR\}/etc/hadoop/slaves and enter all the slave IPs (including master if it is also a datanode)
 \end{itemize}
 
-At this point multi node setup is complete, to start hadoop issue start-dfs.sh and start-yarn.sh on the master to enable auto start of every slave as datanode.
+At this point multi-node setup is complete, to start Hadoop issue ``start-dfs.sh'' and ``start-yarn.sh'' on the master to enable the auto-start of every slave as a data node.
 
 \section{Word count}
 \subsection{Problem Overview}
-Word count problem is an introductory program in MapReduce paradigm. It is very easy to parallelize and gives a very clear overview how MapReduce works.
-\BlankLine Word count as the name implies counts the number of unique words in a file, our implementation is case insenstive. If the dataset is very large then the sequential algorithm will take a long time to do the counting.
+Word count problem is an introductory problem in MapReduce paradigm. It is very easy to parallelize and gives a very clear overview how MapReduce works.
+\BlankLine The Word count problem, as the name implies, counts the number of unique words in a file. our implementation is case sensitive. If the dataset is very large then the sequential algorithm will take a long time to do the counting.
 To use a parallel algorithm for it in MapReduce, it is important to think about how the input \{key,value\} pair should be prepared. What the mapper should produce and how the reducer will consume this to calculate the final result.
 To fit this problem to the MapReduce pattern we start by creating a map function that can take the dataset and create a \{key,value\} pair.
-This can be done by taking each word in a the dataset and using that word as the key and the value as 1.
+This can be done by taking each word in a dataset and using that word as the key and the value as 1.
+
  For example the sentence "A This is a a word". Would map to
- \BlankLine \{"A", 1 \},\{"This", 1 \},\{"is", 1 \}, \{"a", 1 \}, \{"a", 1 \},  \{"word", 1 \}
-\BlankLine The reduce part of the problem would take the \{key, value\} pairs and generate.
-\BlankLine \{"A", 1 \}, \{"This", 1 \}, \{"is", 1 \}, \{"a", 2 \},  \{"word", 1 \}
-\BlankLine In the section below we define the algorithm in psuedo code and one possible implementation in Python.
+ \BlankLine \{"A", 1 \}, \{"This", 1 \}, \{"is", 1 \}, \{"a", 1 \}, \{"a", 1 \}, \{"word", 1 \}, \BlankLine The reduce part of the problem would take the \{key, value\} pairs and generate -
+\BlankLine \{"A", 1 \}, \{"This", 1 \}, \{"is", 1 \}, \{"a", 2 \}, \{"word", 1 \}
+\BlankLine In the section below the report defines the algorithm in psuedo code and one possible implementation in Python.
 \subsection{Algorithm}
 For mapper, the algorithm \ref{algo:wcmap} emits the word and count 1. In the reducer, the algorithm \ref{algo:wcred} emits the word and sum of the count.
 \BlankLine
@@ -214,11 +214,12 @@ $sum\leftarrow $0\;
 \caption{Word Count Reducer\label{algo:wcred}}
 \end{algorithm}
 \DecMargin{1em}
-\subsection{Source Code}
+\subsection{Code Snippet}
+In the code snippet \ref{lst:wcmap}, it generates the intermediate \{key, value\} pair. And the reducer can be implemented as code snippet \ref{lst:wcred}.
 
-\begin{lstlisting}[caption={Word count mapper code},label={lst:mmmap},style=MyPythonStyle]
+
+\begin{lstlisting}[caption={Word count mapper code},label={lst:wcmap},style=MyPythonStyle]
 	import sys
-
 
 	for line in sys.stdin:
 		keys = line.strip().split()
@@ -227,8 +228,10 @@ $sum\leftarrow $0\;
 	        	print( "%s\t%d" % (key, value) )
 
 \end{lstlisting}
+
 \BlankLine
-\begin{lstlisting}[caption={Word count reducer code},label={lst:mmmap},style=MyPythonStyle]
+\begin{lstlisting}[caption={Word count reducer code},label={lst:wcred},style=MyPythonStyle]
+
 	import sys
 
 	last_key = None
@@ -251,25 +254,25 @@ $sum\leftarrow $0\;
 \end{lstlisting}
 
 \subsection{Analysis}
-\BlankLine The sequential algorithm is $\mathcal{O}(n)$ since we have to touch each word in order to count it, since we have n words this is $\mathcal{O}(n)$. For a parallel algorithm with $p$ processors and in each processor we count $\frac{n}{p}$ words. So this is $\mathcal{O}(\frac{n}{p})$.
+\BlankLine The sequential algorithm is $O(n)$ since the algorithm touch each word in order to count it and since the input has $N$ words, this is $O(n)$. For a parallel algorithm with $p$ processors and in each processor, it counts $\frac{n}{p}$ words. So this gives, $O(\frac{n}{p})$.
 
 
-Parallel Algorithm Time, ${T_{p}}$ = $\mathcal{O}(\frac{n}{p})$
+Parallel Algorithm Time, ${T_{p}}$ = $O(\frac{n}{p})$
 
-Naive Sequential Algorithm, ${T_{s}}$ = $\mathcal{O}(n)$
+Naive Sequential Algorithm, ${T_{s}}$ = $O(n)$
 
 Number of processor, p = $p$
 
-Speedup, ${S = T_{s}/T_{p}}$ = $\frac{\mathcal{O}(\frac{n}{p})}{\mathcal{O}(n)}$ = $\mathcal{O}(1)$
+Speedup, ${S = T_{s}/T_{p}}$ = $\frac{O(n)}{O(\frac{n}{p})}$ = $O(p) = O(1)$ as $p << N$
 
-Efficiency, ${E = S/p}$ = $\frac{\mathcal{O}(1)}{p}$ = $\mathcal{O}(\frac{1}{p})$
+Efficiency, ${E = S/p}$ = $\frac{O(p)}{p}$ = $O(1)$
 
 \subsection{Results}
-Word count of 50, 000 words took 3.4 seconds.
+Word count implementation in Python took 3.4 seconds to count 50,000 words. It is apparent that disk I/O (communication time) is very high in streaming API compare to native (Java) application.
 \section{Matrix multiplication}
 
 \subsection{Problem Overview}
-Matrix multiplication is a very common but highly practical operation. The problem of matrix multiplication is believed to be first formualized in 19th centuray, however proof does exists that it was being used even before that. There are many practical usage of large matrix multiplication, for example - simulation of galaxy systems, data analysis/mining, solving equations and many more.
+Matrix multiplication is a very common but highly practical operation. The problem of matrix multiplication is believed to be first formalized in the 19th century, however, proof does exist that it was being used even before that. There are many practical usages of large matrix multiplication, for example - simulation of galaxy systems, data analysis/mining, solving equations and much more.
 
 Matrix multiplication can be defined as the multiplication of two matrix ${A_{P*Q},B_{Q*R}}$ to generate resultant matrix ${C_{P*R}}$ where ${C_{(i,j)}}$ is defined as
 \begin{equation}
@@ -283,13 +286,15 @@ In order to parallelize the matrix multiplication on a MapReduce paradigm, it is
 \item How reducer will make the final result
 \end{itemize}
 
-From \(1\) it is evident that for to calculate the elements in a single row of the resultant matrix C, all of the values from the same row of A is required and all the values from the same column of B is required. In other words, to calculate the result for any ${C_{(i,j)}}$ the value ${A_{(i,0)} ...  A_{(i,R)}}$ and ${B_{(0,j)} ... B_{(P,j)}}$  must be passed to a reducer. This simple analysis provides hints on the mappers ouput.
+From \(1\) it is evident that for to calculate the elements in a single row of the resultant matrix C, all of the values from the same row of A is required and all the values from the same column of B are required. In other words, to calculate the result for any ${C_{(i,j)}}$ the value ${A_{(i,0)} ... A_{(i,R)}}$ and ${B_{(0,j)} ... B_{(P,j)}}$ must be passed to a reducer. This simple analysis provides hints on the mapper\textsc{\char13}s output.
 
 The map function needs to output for each value within a ${row_{x}}$ in A as ${I_{(x, 0)}, I_{(x, 1)} …  I_{(x,R)}}$ and for each value within a ${col_{y}}$ in B it needs to produce ${I_{(0, y)}, I_{(1, y)} …  I_{(P,y)}}$. All the ${I}$ values with same key will be  collected in the Shuffle/Combine step of map reduce. This ensures that a particular reducer will have all the values to compute 1 for a particular i,j.
 
 The input of a particular matrix is given as ${(MatrixId,i,j,Value)}$ for each value of that matrix.
 
 \subsection{Algorithm}
+In the mapper algorithm, for each value of a matrix, if it is from $A$ is repeated up to the number of columns in matrix $B$. If the value is from $B$, it is repeated up to the number of rows in matrix $A$. The algorithm \ref{algo:mmmap} gives the pseudocode for the mapper function.\BlankLine
+ 
 \IncMargin{1em}
 \begin{algorithm}[H]
 \DontPrintSemicolon
@@ -312,9 +317,11 @@ $P\leftarrow \GetRowSize($A)\;
 			\emit((k,j), (matrix\_id,i,value))
 		}
 	}
-\caption{Matrix Mul Mapper\label{IR}}
+\caption{Matrix Mul Mapper\label{algo:mmmap}}
 \end{algorithm}
 \DecMargin{1em}
+
+\BlankLine In the reducer algorithm, all the required values from $A$ and $B$ are there. So, it needs to multiply the values from $A$ and $B$ which have the same indices. The algorithm \ref{algo:mmred} gives the pseudocode for the reducer function.\BlankLine
 
 \IncMargin{1em}
 \begin{algorithm}[H]
@@ -342,13 +349,13 @@ $sum\leftarrow\ $0\;
 
 \emit((i,k), sum)
 
-\caption{Matrix Mul Reducer\label{IR}}
+\caption{Matrix Mul Reducer\label{algo:mmred}}
 \end{algorithm}
 \DecMargin{1em}
 
 \subsection{Code Snippet}
 
-The Listing \ref{lst:mmmap} shows the java implements of the mapper.
+The code snippet \ref{lst:mmmap} shows the java implements of the mapper.
 
 \begin{lstlisting}[caption={Matrix multiplication mapper code snippet},label={lst:mmmap},style=MyJavaStyle]
 protected void map(LongWritable key, Text value, Context context)
@@ -380,7 +387,7 @@ protected void map(LongWritable key, Text value, Context context)
 }
 \end{lstlisting}
 
-Listing \ref{lst:mmred} shows the java implemenentation of the reducer.
+Code snippet \ref{lst:mmred} shows the java implementation of the reducer.
 
 \begin{lstlisting}[caption={Matrix multiplication reducer code snippet},label={lst:mmred},style=MyJavaStyle]
 protected void reduce(Text arg0, Iterable<Text> arg1, Context arg2) throws java.io.IOException ,InterruptedException {
@@ -412,9 +419,9 @@ protected void reduce(Text arg0, Iterable<Text> arg1, Context arg2) throws java.
 \subsection{Analysis}
 Let, A and B are the same $(N,N)$ matrix.
 The algorithm described above has a mapper time complexity and a reducer time complexity.
-The time complexity of mapper is ${O(N)}$. This is because for each of the value, it has to produce N times of that value.
+The time complexity of mapper is ${O(N)}$. This is because, for each of the value, it has to produce N times of that value.
 The time complexity of reducer is ${O(N)}$. This is because it iterates through N values of generated items from M and N and produces the final sum.
-So, the overall time complexity of the parallel aglorithm is ${O(N)}$\BlankLine
+So, the overall time complexity of the parallel algorithm is ${O(N)}$\BlankLine
 
 Parallel Algorithm Time, ${T_{p}}$ = ${O(N)}$
 
@@ -427,13 +434,13 @@ Speedup, ${S = T_{s}/T_{p}}$ = ${O(N^3)/O(N)}$ = ${O(N^2)}$
 Efficiency, ${E = S/p}$ = ${O(N^2) / O(N^2)}$ = ${O(1)}$
 
 \subsection{Results}
-For the testing purpose, random values for large matrix was generated using a program. The randomness of the values is dependent upon the pseudo random function provided by the Java library. In a two node hadoop cluster the map reduce application was ran.\BlankLine
+For the testing purpose, random values for large matrix was generated using a program. The randomness of the values is dependent upon the pseudo random function provided by the Java library. In a two node Hadoop cluster, the map-reduce application was executed.\BlankLine
 
 In a $(50,50)$ A and B matrix the run time for MapReduce was approximately 2.5 seconds.
 
 In a $(2000,2000)$ A and B matrix the run time for MapReduce was approximately 6.7 seconds.
 
-It is apparant that in hadoop implementation of MapReduce, the disk I/O is the major bottleneck for the performance.
+It is apparent that in Hadoop implementation of MapReduce, the disk I/O is the major bottleneck for the performance \cite{c452017}.
 
 \section{Decision tree}
 
@@ -835,20 +842,23 @@ The complexity of the mapreduce algorithm can be broken down task by task.
 \begin{thebibliography}{9}
 \bibitem{wikidt}
 \textit https://en.wikipedia.org/wiki/Decision\_tree
-\bibitem{hadoopibm}
-\textit https://www.ibm.com/developerworks/library/bd-hadoopyarn/
+\bibitem{mrgoogle}
+Dean, J., \& Ghemawat, S. (2008).
+\textit MapReduce: simplified data processing on large clusters. Communications of the ACM, 51\(1\), 107-113.
 \bibitem{c452017}
 Mu, Y., Liu, X., Yang, Z., \& Liu, X. (2017).
 \textit A parallel C4. 5 decision tree algorithm based on MapReduce. Concurrency and Computation: Practice and Experience.
+\bibitem{hadoopibm}
+\textit https://www.ibm.com/developerworks/library/bd-hadoopyarn/
+\bibitem{hadoopap}
+Apache Hadoop.
+\textit http://hadoop.apache.org/
 \bibitem{c45cn}
 Wei Dai, Wei Ji.
 \textit A MapReduce Implementation of C4.5 Decision Tree Algorithm.
 \bibitem{c45in}
 Prayag Surrendran, Redappa G Naidu, Dinesh R.
 \textit Implementation of C4.5 Algorithm Using Hadoop MapReduce Framework.
-\bibitem{hadoopap}
-Apache Hadoop.
-\textit http://hadoop.apache.org/
 \bibitem{wikientropy}
 Entropy.
 \textit https://en.wikipedia.org/wiki/Entropy\_\(information\_theory\)
