@@ -38,19 +38,19 @@
 
 
 Decision trees are commonly used in operations research, specifically in decision analysis, to help identify a strategy most likely to reach a goal, but are also a popular tool in machine learning\cite{wikidt}. However running decision tree on large dataset sequentially takes a lot of time. So, the natural evolution to optimize the sequential algorithm is to introduce parallel decision tree algorithm. Unlike sequential algorithm, parallel algorithm sometimes often tied to the parallel architecture on which it runs. Again, parallel architectures are not easily exposed or available to the algorithm itself. Hadoop implements MapReduce paradigm on commodity hardware in a distributed environment. The MapReduce paradigm reduces the complexity of programming and coordination of each node separately.
-\BlankLine This report explores an algorithm for the decision tree, which is implemented on Hadoop, looks into the performance and covers some analysis of it. The following section describes the organization of this report.\BlankLine
+\BlankLine This report explores an algorithm for decision tree, which is implemented on hadoop, looks into the performance and covers some analysis of it. Following section describes the organization of this report.\BlankLine
 
-Firstly the report covers about the MapReduce paradigm itself and how it works. This will give the reader a sense how an algorithm, intended to be implemented in a MapReduce environment, should be approached.
+Firstly the report covers about the MapReduce paradigm itself and how it works. This will give the reader a sense how an algorithm, intended to be implemented on a MapReduce environment, should be approached.
 
-After the first section, the report covers a simplified overview of the Hadoop architecture and how to set up a two-node cluster.
+Next section will cover a simplified overview of the hadoop architecture and how to set up a two node cluster.
 
-After that, two sections cover MapReduce version of word counting and matrix multiplication algorithms to enable the reader to visualize how an algorithm works in the MapReduce paradigm.
+Next two sections will cover MapReduce version of word counting and matrix multiplication algorithms to enable the reader to visualize how an algorithm works in the MapReduce paradigm.
 
-After giving the overview on MapReduce paradigm, the next section of the report focuses on the main problem, decision tree. The report goes through the problem statement, current state of art and gives an overview of the problem. Then the report looks into the algorithm and how it works. Finally, it provides the algorithms and code snippets along with the results to conduct empirical studies of the algorithm in future.
-In the closing sections, this report briefly goes over some of the possible future works and then draw the conclusion.
+In the next section the report focuses on the main problem, decision tree. The report goes through the problem statement, current state of art and tries to give an overview of the problem. Then the report will look into the algorithm and how it works. Finally it provides the algorithms and code snippets along with the results for empirical studies of the algorithm in future.
+In the closing sections, we will briefly go over possible future works and then draw the conclusion.
 
 \section{Map Reduce}
-Map reduce paradigm was first published in 2004 by Google in a white paper \cite{mrgoogle}. The idea behind it was to distribute large set of data to multiple workers, whom will work in parallel. After their work all the output are gathered and then another round of operation is performed to generate the final output. This kind of idea generally seems to be divide and conquer. Where large set of data is broken down and passed to initial workers. The operation performed by the initial worker is called map function, and trivially the workers are termed mapper. All the node executes the same mapper on a subset of the dataset and generate intermediate output. Then the output is grouped and passed to another set of worker. The operation performed by these worker are called reduce function, and the workers are termed reducer. The overall view can be understood from figure \ref{fig:mrp}. So, from a high-level mapreduce paradigm has 3 steps -
+Map reduce paradigm was first published in 2004 by Google’s white paper. The idea behind it was to distribute large set of data to multiple workers, whom will work in parallel. After their work all the output are gathered and then another round of operation is performed to generate the final output. This kind of idea generally seems to be divide and conquer. Where large set of data is broken down and passed to initial workers. The operation performed by the initial worker is called map function, and trivially the workers are termed mapper. All the node executes the same mapper on a subset of the dataset and generate intermediate output. Then the output is grouped and passed to another set of worker. The operation performed by these worker are called reduce function, and the workers are termed reducer. So, from a high-level mapreduce paradigm has 3 steps -
 \begin{itemize}
 \item Map
 \item Combine/Shuffle
@@ -176,18 +176,9 @@ To use a parallel algorithm for it in MapReduce, it is important to think about 
 To fit this problem to the MapReduce pattern we start by creating a map function that can take the dataset and create a \{key,value\} pair.
 This can be done by taking each word in a the dataset and using that word as the key and the value as 1.
  For example the sentence "A This is a a word". Would map to
- \BlankLine \{"A", 1 \}
-\BlankLine \{"This", 1 \}
-\BlankLine \{"is", 1 \}
-\BlankLine \{"a", 1 \}
-\BlankLine \{"a", 1 \}
-\BlankLine \{"word", 1 \}
+ \BlankLine \{"A", 1 \},\{"This", 1 \},\{"is", 1 \}, \{"a", 1 \}, \{"a", 1 \},  \{"word", 1 \}
 \BlankLine The reduce part of the problem would take the \{key, value\} pairs and generate.
-\BlankLine \{"A", 1 \}
-\BlankLine \{"This", 1 \}
-\BlankLine \{"is", 1 \}
-\BlankLine \{"a", 2 \}
-\BlankLine \{"word", 1 \}
+\BlankLine \{"A", 1 \}, \{"This", 1 \}, \{"is", 1 \}, \{"a", 2 \},  \{"word", 1 \}
 \BlankLine In the section below we define the algorithm in psuedo code and one possible implementation in Python.
 \subsection{Algorithm}
 For mapper, the algorithm \ref{algo:wcmap} emits the word and count 1. In the reducer, the algorithm \ref{algo:wcred} emits the word and sum of the count.
@@ -236,7 +227,7 @@ $sum\leftarrow $0\;
 	        	print( "%s\t%d" % (key, value) )
 
 \end{lstlisting}
-
+\BlankLine
 \begin{lstlisting}[caption={Word count reducer code},label={lst:mmmap},style=MyPythonStyle]
 	import sys
 
@@ -274,7 +265,7 @@ Speedup, ${S = T_{s}/T_{p}}$ = $\frac{\mathcal{O}(\frac{n}{p})}{\mathcal{O}(n)}$
 Efficiency, ${E = S/p}$ = $\frac{\mathcal{O}(1)}{p}$ = $\mathcal{O}(\frac{1}{p})$
 
 \subsection{Results}
-
+Word count of 50, 000 words took 3.4 seconds.
 \section{Matrix multiplication}
 
 \subsection{Problem Overview}
@@ -509,8 +500,6 @@ The goal is to pick the attribute with maximum information gain.
 
 \subsection{Algorithm}
 
-There are several map and reduce algorithm which slowly builds up the whole algorithm. For the sake of clarity and better understandability, it has been kept seperate. The first part of the algorithm performs the map function necessary for generating the attribute table. This map algorithm is very simple and give in the Algorithm \ref{algo:atmap}. It takes one row and generates the output for each of the attribute within a single input line.
-
 \IncMargin{1em}
 \begin{algorithm}[H]
 \DontPrintSemicolon
@@ -520,11 +509,9 @@ There are several map and reduce algorithm which slowly builds up the whole algo
 \Output{(${a_{j}}$,(row\_id, c))}
 \BlankLine
 \emit(${a_{j}}$,(row\_id, c))
-\caption{Attribute Table Mapper\label{algo:atmap}}
+\caption{Attribute Table Mapper\label{algo:atmap}} Sample reducer code in python. 
 \end{algorithm}
 \DecMargin{1em}
-
-Once the mapper is done generating the intermediate results, reducer perform the reduction. The reduction algorithm used in this report is very straight forward. It Accumulates and perform the count() operation for each ${{attribute\_value,classifier}}$ pair. The algorithm is given by Algorithm \ref{algo:atred} and \ref{algo:atred2}.
 
 \IncMargin{1em}
 \begin{algorithm}[H]
@@ -542,8 +529,6 @@ $count\leftarrow$ 0\;
 \caption{Attribute Table Reducer\label{algo:atred}}
 \end{algorithm}
 \DecMargin{1em}
-
-After reducer redueces the map for each entry, the calculation now focuses on finding the best attibute by inspecting the information
 
 \IncMargin{1em}
 \begin{algorithm}[H]
@@ -577,11 +562,9 @@ calc \Entropy(${a_{j}}$)\;
 calc \InfoGain(${a_{j}}$) = ${(count/all) * Entropy(a_{j})}$\;
 calc \SplitInfoGain(${a_{j}}$) = ${- (count/all) * \log_{2}{(count/all)}}$\;
 \emit(${a_{j}}$,$(InfoGain(a_{j}), SplitInfoGain(a_{j}))$)
-\caption{Attribute Selection Mapper\label{algo:atred2}}
+\caption{Attribute Selection Mapper\label{algo:atred}}
 \end{algorithm}
 \DecMargin{1em}
-
-Algorithm \ref{algo:gratio}
 
 \IncMargin{1em}
 \begin{algorithm}[H]
@@ -832,9 +815,9 @@ throws IOException, InterruptedException {
         }
         float gainRatio = Float.parseFloat(values[2]);
         if (mGain < gainRatio) {
-            mGain = gainRatio;
-            aBest = values[0];
-            mCount = Integer.parseInt(values[1]);
+	mGain = gainRatio;
+	aBest = values[0];
+	mCount = Integer.parseInt(values[1]);
         }
     }
     arg2.write(new Text(aBest), new Text(String.ValueOf(mCount)));
@@ -849,9 +832,6 @@ throws IOException, InterruptedException {
 \begin{thebibliography}{9}
 \bibitem{wikidt}
 \textit https://en.wikipedia.org/wiki/Decision\_tree
-\bibitem{mrgoogle}
-Dean, J., \& Ghemawat, S. (2008).
-\textit MapReduce: simplified data processing on large clusters. Communications of the ACM, 51\(1\), 107-113.
 \bibitem{hadoopibm}
 \textit https://www.ibm.com/developerworks/library/bd-hadoopyarn/
 \bibitem{c452017}
