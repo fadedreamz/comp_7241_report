@@ -35,6 +35,8 @@
 \addtocontents{toc}{~\hfill\textbf{Page}\par}
 \newpage
 \section{Introduction}
+
+
 Decision trees are commonly used in operations research, specifically in decision analysis, to help identify a strategy most likely to reach a goal, but are also a popular tool in machine learning\cite{wikidt}. However running decision tree on large dataset sequentially takes a lot of time. So, the natural evolution to optimize the sequential algorithm is to introduce parallel decision tree algorithm. Unlike sequential algorithm, parallel algorithm sometimes often tied to the parallel architecture on which it runs. Again, parallel architectures are not easily exposed or available to the algorithm itself. Hadoop implements MapReduce paradigm on commodity hardware in a distributed environment. The MapReduce paradigm reduces the complexity of programming and coordination of each node separately.
 \BlankLine This report explores an algorithm for decision tree, which is implemented on hadoop, looks into the performance and covers some analysis of it. Following section describes the organization of this report.\BlankLine
 
@@ -445,13 +447,26 @@ It is apparant that in hadoop implementation of MapReduce, the disk I/O is the m
 \section{Decision tree}
 
 \subsection{Problem Overview}
+The focus of our paper is on decision trees, the decision tree can be used as a machine learning classifier \cite{quin1}.
+The advantage of a decision tree is that it is a very simple algorithm to understand. The algorithm uses "purity" in order to recursively build the tree.
+Two metrics are used to calculate the purity and what attributes to split on, namely entropy and information gain.
+The disadvantage of a decision tree is that it is expnsive to build especially with a large dataset.
+The problem that we will study is the implementation of C4.5 algorithm using the MapReduce framework.
+
 \subsection{Literature Review}
-There are not many work related to MapReduce based decision tree algorithm.
-\BlankLine In sequential algorithm of C4.5 uses the Infomation Gain Ratio as the main bias for selecting an attribute for splitting.
-
-In all literature this has been used but extended in various manner for MapReduce paradigm. In \cite{c452017} the information gain ratio was calculated from a single round of map and reduce function. While in \cite{c45cn} the information gain ratio was reduced from several MapReduce function which generated information gain and split information gain. In \cite {c45in} the information gain ratio is computed from the reduction of the map functions, however they write the information gain to a temporaray space which allows a special function to again compute the best attribute to split.
-
-\cite{c45in} suffers from the fact that in highly distributed manner it might not be the case that the temporary file is avaible to other node, leading to wrong value for information gain ratio selection. Even if limiting the mapper to step forward will increase the parallel time and thus reducing the overall speedup and efficiency of the algorithm. \cite{c45cn} uses a very simple approach, using a pipeline of multiple map and reduce to build up the best attribute selection. Although it is simple, it incurs a lots of disk I/O in current hadoop implementation. However in recent hadoop implementation various optimization of disk I/O should reduce the issue. \cite{c452017} uses a more complicated mapper and reducer to select the best attribute. Compare to other two implementation it is much more optimized in term of number of rounds and disk I/O requirements.
+We read several implementation of this algorithm using the MapReduce paradigm.
+In \cite{c452017} the information gain ratio was calculated using a single MapReduce job.
+While in \cite{c45cn} the information gain ratio was calculated from several MapReduce jobs.
+In \cite {c45in} the information gain ratio is computed from the reduction of the map functions,
+they write the information gain to a temporaray space which allows hadoop to access this data for the best attribute to split.
+\cite{c45in} suffers from the fact that in highly distributed manner it might not be the case that the temporary file is avaible to other node,
+ leading to wrong value for information gain ratio selection.
+ Even if limiting the mapper to step forward will increase the parallel time and thus reducing the overall speedup and efficiency of the algorithm.
+ \cite{c45cn} uses a very simple approach, using a pipeline of multiple map and reduce to build up the best attribute selection.
+ Although it is simple, it incurs a lots of disk I/O in current hadoop implementation.
+ However in recent hadoop implementation various optimization of disk I/O should reduce the issue.
+ \cite{c452017} uses a more complicated mapper and reducer to select the best attribute.
+  Compare to other two implementation it is much more optimized in term of number of rounds and disk I/O requirements.
 
 \BlankLine
 As the recursion part of the C4.5 to select the subsequent best attribute, recursion of the MapReduce algorithm is done to slowly build up the solution. In \cite{c45cn}, the proposed mechanism used a pipelined version of several MapReduce application, each performing a specific tasks. In \cite{c452017} and \cite{c45in} proposed method do not use pipelined version instead they rely on complex mapper and reducer.
@@ -846,7 +861,9 @@ Entropy.
 \bibitem{wikiinfogain}
 Information Gain.
 \textit https://en.wikipedia.org/wiki/Information\_gain\_in\_decision\_trees
+\bibitem{quin1}
+Induction of Decision Trees.
+\textit Quinlan, J. Mach Learn (1986) 1: 81. doi:10.1023/A:1022643204877
 \end{thebibliography}
-
 http://codingwiththomas.blogspot.ca/2011/04/controlling-hadoop-job-recursion.html
 \end{document}
