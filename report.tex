@@ -448,7 +448,7 @@ The problem that we will study is the implementation of C4.5 algorithm using the
 We read several implementation of this algorithm using the MapReduce paradigm.
 In \cite{c452017} the information gain ratio was calculated using a single MapReduce job.
 While in \cite{c45cn} the information gain ratio was calculated from several MapReduce jobs.
-In \cite {c45in} the information gain ratio is computed from the reduction of the map functions,
+In \cite{c45in} the information gain ratio is computed from the reduction of the map functions,
 they write the information gain to a temporaray space which allows hadoop to access this data for the best attribute to split.
 \cite{c45in} suffers from the fact that in highly distributed manner it might not be the case that the temporary file is avaible to other node,
  leading to wrong value for information gain ratio selection.
@@ -509,7 +509,7 @@ The goal is to pick the attribute with maximum information gain.
 \Output{(${a_{j}}$,(row\_id, c))}
 \BlankLine
 \emit(${a_{j}}$,(row\_id, c))
-\caption{Attribute Table Mapper\label{algo:atmap}} Sample reducer code in python. 
+\caption{Attribute Table Mapper\label{algo:atmap}} Sample reducer code in python.
 \end{algorithm}
 \DecMargin{1em}
 
@@ -543,7 +543,7 @@ $all\leftarrow$ 0\;
 	$all\leftarrow all + 1$\;
 }
 \emit(${a_{j}}$,(row\_id, count, all))
-\caption{Attribute Table Reducer 2\label{algo:atred}}
+\caption{Attribute Table Reducer 2\label{algo:atred_2}}
 \end{algorithm}
 \DecMargin{1em}
 
@@ -562,7 +562,7 @@ calc \Entropy(${a_{j}}$)\;
 calc \InfoGain(${a_{j}}$) = ${(count/all) * Entropy(a_{j})}$\;
 calc \SplitInfoGain(${a_{j}}$) = ${- (count/all) * \log_{2}{(count/all)}}$\;
 \emit(${a_{j}}$,$(InfoGain(a_{j}), SplitInfoGain(a_{j}))$)
-\caption{Attribute Selection Mapper\label{algo:atred}}
+\caption{Attribute Selection Mapper\label{algo:atmap_2}}
 \end{algorithm}
 \DecMargin{1em}
 
@@ -582,7 +582,7 @@ $gainRatio\leftarrow$ 0.0f\;
 	$gainRatio\leftarrow gainRatio + (InfoGain(a_{j})/SplitInfoGain(a_{j}))$ \;
 }
 \emit(${a_{j}}$,$(GainRatio(a_{j})$)
-\caption{Attribute Selection Reducer\label{algo:atred}}
+\caption{Attribute Selection Reducer\label{algo:atred_3}}
 \end{algorithm}
 \DecMargin{1em}
 
@@ -606,7 +606,7 @@ $maxGR\leftarrow 0$\;
 	}
 }
 \emit(${a_{best}}$,$count$)
-\caption{Attribute Selection Reducer 2\label{algo:atred}}
+\caption{Attribute Selection Reducer 2\label{algo:atred_4}}
 \end{algorithm}
 \DecMargin{1em}
 
@@ -632,7 +632,7 @@ $node\_id\leftarrow$\ \hash(${a_{best}}$)\;
 	$subnode\_id\leftarrow \CreateSubNodeId()$\;
 	\emit($row\_id$, $node\_id$, $subnode\_id$)
 }
-\caption{Tree Grow Reducer\label{algo:atred}}
+\caption{Tree Grow Reducer\label{algo:atred_5}}
 \end{algorithm}
 \DecMargin{1em}
 
@@ -826,6 +826,9 @@ throws IOException, InterruptedException {
 %end of code
 
 \subsection{Analysis}
+The complexity of the C4.5 algorithm is $\c45$ \cite{complexity}. This is due to the calculation of the information gain.
+The complexity of the mapreduce algorithm can be broken down task by task.
+\ref{algo:atmap}
 
 \subsection{Conclusion}
 
