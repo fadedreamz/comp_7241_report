@@ -834,8 +834,24 @@ throws IOException, InterruptedException {
 
 \subsection{Analysis}
 The complexity of the C4.5 algorithm is $\c45$ \cite{complexity}. This is due to the calculation of the information gain.
-The complexity of the mapreduce algorithm can be broken down task by task.
-\ref{algo:atmap}
+The complexity of the MapReduce algorithm can be broken down task by task.
+\ref{algo:atmap} has the complexity $\mathcal{O}(m)$ where $m$ is the number of features and we are mapping on the number of features.
+\ref{algo:atred} has the complexity $\mathcal{O}(mn)$ where $m$ is the number of features and $n$ is the number of instances since we are mapping on the number of features and iteration on the number of instanes.
+\ref{algo:atred_2} has the complexity $\mathcal{O}(mn)$ where $m$ is the number of features and $n$ is the number of instances since we are reducing on the number of instances times the number of features.
+\ref{algo:atmap_2} has the complexity $\mathcal{O}(n)$ where $n$ is the number of instances, this is the complexity of entropy. \cite{complexity}
+\ref{algo:atred_3} has the complexity $\mathcal{O}(n)$ since we are just consuming the reduce from the previous tasks. The list contains only 1 element.
+\ref{algo:atred_4} has the complexity $\mathcal{O}(n)$ since we are just consuming the reduce from the previous tasks and finding the best attribute.
+\ref{algo:atred_5} has the complexity $\mathcal{O}(n)$ since we are just consuming the reduce from the previous tasks. The list contains only 1 element.
+We repeat the the same at worst n
+Parallel Algorithm Time, ${T_{p}}$ = $\mathcal{O}(\frac{n}{p})$
+
+Naive Sequential Algorithm, ${T_{s}}$ = $\mathcal{O}(n)$
+
+Number of processor, p = $p$
+
+Speedup, ${S = T_{s}/T_{p}}$ = $\frac{\mathcal{O}(\frac{n}{p})}{\mathcal{O}(n)}$ = $\mathcal{O}(1)$
+
+Efficiency, ${E = S/p}$ = $\frac{\mathcal{O}(1)}{p}$ = $\mathcal{O}(\frac{1}{p})$
 
 \subsection{Conclusion}
 
