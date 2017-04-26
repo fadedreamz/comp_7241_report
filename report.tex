@@ -21,7 +21,7 @@
 \graphicspath{ {img/} }
 
 \title{Decision Tree on Hadoop}
-\author{Md. Nazmul Alam (40016332), Newman (29469354)}
+\author{Md. Nazmul Alam (40016332), Newman Thurairatnam(29469354)}
 
 \renewcommand\lstlistingname{Code Snippet}
 \renewcommand\lstlistlistingname{Code Snippets}
@@ -47,7 +47,7 @@ Next section will cover a simplified overview of the hadoop architecture and how
 Next two sections will cover MapReduce version of word counting and matrix multiplication algorithms to enable the reader to visualize how an algorithm works in the MapReduce paradigm.
 
 In the next section the report focuses on the main problem, decision tree. The report goes through the problem statement, current state of art and tries to give an overview of the problem. Then the report will look into the algorithm and how it works. Finally it provides the algorithms and code snippets along with the results for empirical studies of the algorithm in future.
-In the closing sections, we will briefly go over possible future works and then draw the conclusion.
+In the closing sections, this report briefly goes over possible future works and then draw the conclusion.
 
 \section{Map Reduce}
 Map reduce paradigm was first published in 2004 by Google in a white paper \cite{mrgoogle}. The idea behind it was to distribute a large set of data to multiple workers, whom will work in parallel. After their work, all the output are gathered and then another round of operation is performed to generate the final output. This kind of idea generally seems to be divide and conquer. Where large set of data is broken down and passed to initial workers. The operation performed by the initial worker is called map function, and trivially the workers are termed mapper. All the node executes the same mapper on a subset of the dataset and generate intermediate output. Then the output is grouped and passed to another set of worker. The operation performed by these worker are called reduce function, and the workers are termed reducer. The overall view can be understood from figure \ref{fig:mrp} \cite{c452017}. So, from a high-level MapReduce paradigm has 3 steps -
@@ -173,7 +173,7 @@ At this point multi-node setup is complete, to start Hadoop issue ``start-dfs.sh
 Word count problem is an introductory problem in MapReduce paradigm. It is very easy to parallelize and gives a very clear overview how MapReduce works.
 \BlankLine The Word count problem, as the name implies, counts the number of unique words in a file. our implementation is case sensitive. If the dataset is very large then the sequential algorithm will take a long time to do the counting.
 To use a parallel algorithm for it in MapReduce, it is important to think about how the input \{key,value\} pair should be prepared. What the mapper should produce and how the reducer will consume this to calculate the final result.
-To fit this problem to the MapReduce pattern we start by creating a map function that can take the dataset and create a \{key,value\} pair.
+To fit this problem to the MapReduce pattern, a map function is required that can take the dataset and create a \{key,value\} pair.
 This can be done by taking each word in a dataset and using that word as the key and the value as 1.
 
  For example the sentence "A This is a a word". Would map to
@@ -445,42 +445,47 @@ It is apparent that in Hadoop implementation of MapReduce, the disk I/O is the m
 \section{Decision tree}
 
 \subsection{Problem Overview}
-The focus of our paper is on decision trees, the decision tree can be used as a machine learning classifier \cite{quin1}.
-The advantage of a decision tree is that it is a very simple algorithm to understand. The algorithm uses "purity" in order to recursively build the tree.
+The focus of this report is on decision trees, the decision tree can be used as a machine learning classifier \cite{quin1}. This report only considered the algorithm for a classification problem, it does not consider the algorithm for regression problem.
+The advantage of a decision tree is that it is a simple algorithm to understand. The algorithm uses "purity" in order to recursively build the tree.
 Two metrics are used to calculate the purity and what attributes to split on, namely entropy and information gain.
-The disadvantage of a decision tree is that it is expnsive to build especially with a large dataset.
-The problem that we will study is the implementation of C4.5 algorithm using the MapReduce framework.
+The disadvantage of a decision tree is that it is expensive to build especially with a large dataset.
+The problem that this report focuses on is the implementation of the C4.5 algorithm using the MapReduce paradigm.
 
 \subsection{Literature Review}
-We read several implementation of this algorithm using the MapReduce paradigm.
+For the literature review, several papers focusing on this type of algorithm using the MapReduce paradigm was reviewed.
 In \cite{c452017} the information gain ratio was calculated using a single MapReduce job.
 While in \cite{c45cn} the information gain ratio was calculated from several MapReduce jobs.
 In \cite{c45in} the information gain ratio is computed from the reduction of the map functions,
-they write the information gain to a temporaray space which allows hadoop to access this data for the best attribute to split.
-\cite{c45in} suffers from the fact that in highly distributed manner it might not be the case that the temporary file is avaible to other node,
- leading to wrong value for information gain ratio selection.
- Even if limiting the mapper to step forward will increase the parallel time and thus reducing the overall speedup and efficiency of the algorithm.
- \cite{c45cn} uses a very simple approach, using a pipeline of multiple map and reduce to build up the best attribute selection.
- Although it is simple, it incurs a lots of disk I/O in current hadoop implementation.
- However in recent hadoop implementation various optimization of disk I/O should reduce the issue.
- \cite{c452017} uses a more complicated mapper and reducer to select the best attribute.
-  Compare to other two implementation it is much more optimized in term of number of rounds and disk I/O requirements.
+All of them wrote the information gain to a temporary space which allows Hadoop to access this data for the selection of the best attribute to split on.
+\cite{c45in} suffers from the fact that in the highly distributed manner it might not be the case that the temporary file is available to other nodes,
+leading to a wrong value for information gain ratio selection.
+Even if limiting the mapper to step forward, will increase the parallel time and thus reducing the overall speedup and efficiency of the algorithm.
+\cite{c45cn} uses a very simple approach, using a pipeline of multiple maps and reduce to build up the best attribute selection.
+Although it is simple, it incurs lots of disks I/O in current Hadoop implementation.
+However, in the recent Hadoop implementation various optimization of disk I/O should reduce the issue.
+\cite{c452017} uses a more complicated mapper and reducer to select the best attribute.
+Compare to other two implementations it is much more optimized in term of a number of rounds and disk I/O requirements.
 
 \BlankLine
-As the recursion part of the C4.5 to select the subsequent best attribute, recursion of the MapReduce algorithm is done to slowly build up the solution. In \cite{c45cn}, the proposed mechanism used a pipelined version of several MapReduce application, each performing a specific tasks. In \cite{c452017} and \cite{c45in} proposed method do not use pipelined version instead they rely on complex mapper and reducer.
+As the recursion part of the C4.5 to select the subsequent best attribute, recursion of the MapReduce algorithm is done to slowly build up the solution. In \cite{c45cn}, the proposed mechanism used a pipelined version of several MapReduce application, each performing specific tasks. In \cite{c452017} and \cite{c45in} proposed method do not use pipelined version instead they rely on complex mapper and reducer.
 
 \BlankLine
 In the tree growing part for MapReduce C45, \cite{c452017}, \cite{c45cn} and \cite{c45in} uses some variant of MapReduce random forest grow algorithm.
 
 \BlankLine
-One major improvement was proposed in \cite{c45cn} by creating three special table to cache the calculation from previous step to the next step. According to their result, they claimed that with this modification they were able to outperform even with single node hadoop performance comparing with sequential algorithm. By using complex mapper and reducer, \cite{c452017} was able to reduce disk I/O overhead and thus increasing the overall algorithm performance. According to their claim, the proposed algorithm scales very well with commodity hardware.
+One major improvement was proposed in \cite{c45cn} by creating three special table to cache the calculation from the previous step to the next step. According to their result, they claimed that with this modification they were able to outperform even with single node Hadoop performance comparing with the sequential algorithm. By using complex mapper and reducer, \cite{c452017} was able to reduce disk I/O overhead and thus increasing the overall algorithm performance. According to their claim, the proposed algorithm scales very well with commodity hardware.
 
 \subsection{Methodology}
+In this report, the methodology used is similar to \ref{c45cn}. The algorithm uses a pipeline of the sequential map and reduces operation. It performs the attribute table computation once and iterates over rest of the pipeline until the full decision tree is generated. The algorithm terminates if there is no more sub\_node\_id to be added to a selected node\_id.
+
+This report contains a small modification to the algorithm to cache the information between the map-reduce pipeline in a single iteration. This reduces the redundant calculation for the next iteration of the algorithm by using the value computed in the current iteration to update the attribute table.
+
+Although this does not contribute to the asymptotic run time complexity, it does provides a little gain in exact runtime.
 
 \subsection{Decision Tree Concept: Entropy}
-Generally, entropy refers to disorder or uncertainty. In Information theory, entropy is the expected value (average) of the information contained in each message. 'Messages' can be modeled by any flow of information \cite{wikientropy}. In plain sentence entropy can be viewed as the chaos within a message. To understand why entropy is valuable in selecting an attribute over other, it is important to develop the intution on why a certain attribute is picked.
+Generally, entropy refers to disorder or uncertainty. In Information theory, entropy is the expected value (average) of the information contained in each message. 'Messages' can be modeled by any flow of information \cite{wikientropy}. In a plain sentence, entropy can be viewed as the chaos within a message. To understand why entropy is valuable in selecting an attribute over other, it is important to develop the intuition on why a certain attribute is picked.
 
-For an attribute ${X}$ such that it has 2 positive classifier and 2 negative classifier denoted by ${X_{2,2}}$, it is very difficult to make any kind of decision based on the attribute. Where considering another attribute ${Y}$ such that it has 3 positive classifier and 2 negative classifier denoted by ${Y_{2,2}}$, it is possible to say that it has a higher probably to correctly capture the positive classifier. Again an attribute ${Z}$ such that it has 2 positive and 3 negative classifier denoted by ${Z_{2,3}}$, it is possible to say that it has a higher probability to correctly capture the negative classifier. This probablitiy of an outcome helps to capture the entropy of an attribute. Figure \ref{fig:entropy} provides a very good view how entropy behaves. At probablity 0.5 the entropy is highest, making difficult to predict the outcome, where at probablity  0 and 1 the entropy is minimum, making very easy to predict the outcome.
+For an attribute ${X}$ such that it has 2 positive classifiers and 2 negative classifiers denoted by ${X_{2,2}}$, it is very difficult to make any kind of decision-based on the attribute. Where considering another attribute ${Y}$ such that it has 3 positive classifiers and 2 negative classifiers denoted by ${Y_{2,2}}$, it is possible to say that it has a higher probably to correctly capture the positive classifier. Again an attribute ${Z}$ such that it has 2 positive and 3 negative classifiers denoted by ${Z_{2,3}}$, it is possible to say that it has a higher probability to correctly capture the negative classifier. This probability of an outcome helps to capture the entropy of an attribute. Figure \ref{fig:entropy} provides a very good view how entropy behaves. At probability 0.5 the entropy is highest, making difficult to predict the outcome, where at probably 0 and 1 the entropy is minimum, making very easy to predict the outcome.
 
 \begin{figure}[H]
 	\centering
@@ -496,7 +501,7 @@ Entropy(a)\ = P(a)\ - \sum_{v \in values(C)}\log_{2}{P(a)}
 where C defines the set for classifier.
 
 \subsection{Decision Tree Concept: Information Gain}
-In decision tree, information gain means the mutual information carried by an attribute comparing to the classifier\cite{wikiinfogain}. In plain english, it is generally measure of ``information'' of a particular value of an attribute in contrast with entropy. For example, if an attribute holds ${X,Y,Z}$ values, each with different outcome. Then by contrasting each of them against the entropy of whole set, we can conclude which attribute should be the best node to pick.
+In a decision tree, information gain means the mutual information carried by an attribute comparing to the classifier\cite{wikiinfogain}. In plain English, it generally measures of ``information'' of a particular value of an attribute in contrast with entropy. For example, if an attribute holds ${X,Y,Z}$ values, each with a different outcome. Then by contrasting each of them against the entropy of the whole set, the algorithm can conclude which attribute should be the best node to pick.
 
 The equation for information gain is given by -
 \begin{equation}
@@ -506,6 +511,8 @@ IG(S, a)\ =\ Entropy(S)\ - \sum_{v \in values(a)}(\ \abs{x \in S\mid x_{a} = v}/
 The goal is to pick the attribute with maximum information gain.
 
 \subsection{Algorithm}
+
+The algorithm \ref{algo:atmap} performs the initial mapper to generate the attribute table.
 
 \IncMargin{1em}
 \begin{algorithm}[H]
@@ -519,6 +526,8 @@ The goal is to pick the attribute with maximum information gain.
 \caption{Attribute Table Mapper\label{algo:atmap}} Sample reducer code in python.
 \end{algorithm}
 \DecMargin{1em}
+
+The algorithm \ref{algo:atred} performs the initial reducer to generate the attribute table.
 
 \IncMargin{1em}
 \begin{algorithm}[H]
@@ -537,6 +546,8 @@ $count\leftarrow$ 0\;
 \end{algorithm}
 \DecMargin{1em}
 
+The algorithm \ref{algo:atred_2} performs the final reducer to generate the attribute table.
+
 \IncMargin{1em}
 \begin{algorithm}[H]
 \DontPrintSemicolon
@@ -553,6 +564,8 @@ $all\leftarrow$ 0\;
 \caption{Attribute Table Reducer 2\label{algo:atred_2}}
 \end{algorithm}
 \DecMargin{1em}
+
+The algorithm \ref{algo:atmap_2} performs the mapper to calculate the entropy and information gain for a particular attribute, it generates the intermediate \{key, value\} pairs which are required to decision on the best attribute.
 
 \IncMargin{1em}
 \begin{algorithm}[H]
@@ -572,6 +585,8 @@ calc \SplitInfoGain(${a_{j}}$) = ${- (count/all) * \log_{2}{(count/all)}}$\;
 \caption{Attribute Selection Mapper\label{algo:atmap_2}}
 \end{algorithm}
 \DecMargin{1em}
+
+The algorithm \ref{algo:atred_3} performs the final reducer to generate the overall information gain ratio for a particular attribute.
 
 \IncMargin{1em}
 \begin{algorithm}[H]
@@ -594,6 +609,8 @@ $gainRatio\leftarrow$ 0.0f\;
 \DecMargin{1em}
 
 % algorithm for best attribute selection -->
+
+The algorithm \ref{algo:atred_4} performs the reduction over all the information gain ratio to select the best attribute to split on.
 
 \IncMargin{1em}
 \begin{algorithm}[H]
@@ -621,6 +638,8 @@ $maxGR\leftarrow 0$\;
 
 % algorithm for tree growing -->
 
+The algorithm \ref{algo:atred_5} performs the reduction to slowly grow the tree.
+
 \IncMargin{1em}
 \begin{algorithm}[H]
 \DontPrintSemicolon
@@ -647,6 +666,7 @@ $node\_id\leftarrow$\ \hash(${a_{best}}$)\;
 
 \subsection{Code Snippets}
 
+This section provides the code snippet for the algorithm implemented in Java.
 % attribute selection mapper code
 
 \begin{lstlisting}[caption={Attrib Table Mapper code snippet},label={lst:attrtblmap},style=MyJavaStyle]
@@ -834,15 +854,15 @@ throws IOException, InterruptedException {
 
 \subsection{Analysis}
 The complexity of the C4.5 algorithm is $\mathcal{O}(mn^{2})$ \cite{complexity}. This is due to the calculation of the information gain.
-The complexity of the MapReduce algorithm can be broken down job by job. We split the n instances on p processors.
-\ref{algo:atmap} has the complexity $\mathcal{O}(m)$ where $m$ is the number of features and we are mapping on the number of features.
-\ref{algo:atred} has the complexity $\mathcal{O}(\frac{mn}{p})$ where $m$ is the number of features and $n$ is the number of instances since we are mapping on the number of features and iteration on the number of instanes.
-\ref{algo:atred_2} has the complexity $\mathcal{O}(\frac{mn}{p})$ where $m$ is the number of features and $n$ is the number of instances since we are reducing on the number of instances multiplied by the number of features.
+The complexity of the MapReduce algorithm can be broken down a job by job. This report splits then instances on p processors.
+\ref{algo:atmap} has the complexity $\mathcal{O}(m)$ where $m$ is the number of features and the algorithm is mapping on the number of features.
+\ref{algo:atred} has the complexity $\mathcal{O}(\frac{mn}{p})$ where $m$ is the number of features and $n$ is the number of instances since the algorithm is mapping on the number of features and iteration on the number of instances.
+\ref{algo:atred_2} has the complexity $\mathcal{O}(\frac{mn}{p})$ where $m$ is the number of features and $n$ is the number of instances since the algorithm is reducing the number of instances multiplied by the number of features.
 \ref{algo:atmap_2} has the complexity $\mathcal{O}(\frac{n}{p})$ where $n$ is the number of instances, this is the complexity of entropy. \cite{complexity}
-\ref{algo:atred_3} has the complexity $\mathcal{O}(\frac{n}{p})$ since we are just consuming the reduce from the previous tasks. The list contains only 1 element.
-\ref{algo:atred_4} has the complexity $\mathcal{O}(\frac{n}{p})$ since we are just consuming the reduce from the previous tasks and finding the best attribute.
-\ref{algo:atred_5} has the complexity $\mathcal{O}(\frac{n}{p})$ since we are just consuming the reduce from the previous tasks. The list contains only 1 element.
-We repeat \ref{algo:atred_2} to\ref{algo:atred_5} n times so in the worst case we have $\mathcal{O}(\frac{mn^{2}}{p})$
+\ref{algo:atred_3} has the complexity $\mathcal{O}(\frac{n}{p})$ since the algorithm is just consuming the reduce from the previous tasks. The list contains only 1 element.
+\ref{algo:atred_4} has the complexity $\mathcal{O}(\frac{n}{p})$ since the algorithm is just consuming the reduce from the previous tasks and finding the best attribute.
+\ref{algo:atred_5} has the complexity $\mathcal{O}(\frac{n}{p})$ since the algorithm is just consuming the reduce from the previous tasks. The list contains only 1 element.
+Repeat \ref{algo:atred_2} to \ref{algo:atred_5} n times so in the worst case it is $\mathcal{O}(\frac{mn^{2}}{p})$
 
 \BlankLine Parallel Algorithm Time, ${T_{p}}$ = $\mathcal{O}(\frac{mn^{2}}{p})$
 
@@ -854,9 +874,17 @@ We repeat \ref{algo:atred_2} to\ref{algo:atred_5} n times so in the worst case w
 
 \BlankLine Efficiency, ${E = S/p}$ = $\frac{\mathcal{O}(1)}{p}$ = $\mathcal{O}(\frac{1}{p})$ as $p << N$
 
-\subsection{Conclusion}
-From the study of various papers and the implemntation of a few algorithms we came to the conclusion that most of the time sequential algorithms out perform MapReduce.
-MapReduce needs a lot of data in order to balance the trade off using a distributed computing. Our datasets was not large enough to take advantage of Hadoop MapReduce.
+\section{Future Work}
+In this report, the algorithm used for matrix multiplication was not optimal. The efficiency was $O(1)$ which is not good. There are some other papers which provide a better solution.
+
+The algorithm used in this report for decision tree suffers from the pipelined map-reduce approach. This is because there is a disk operation in between each of map-reduce within the pipeline. This problem can be overcome by using approaches used in \cite{c452017}. So, in future, this work can be extended to include the performance gain by other versions of decision tree algorithm on the map-reduce paradigm.
+
+\section{Conclusion}
+In order to get benefit from the map-reduce paradigm, the dataset should be huge. One good thing about map-reduce paradigm is that it hides the underlying complexity of implementation of the algorithm over distributed nodes. This is very good for an algorithm which works in a divide and conquer method to parallelize.
+
+From the study of various papers and the implementation of a few algorithms, it can be concluded that most of the time sequential algorithms outperform MapReduce if the dataset is small. This is because the communication time becomes larger than the benefit of running the algorithm on a parallel processor.
+Moreover, it was pretty much apparent that in Hadoop implementation the disk I/O is one of the major bottlenecks for performance. However, it should not be taken into consideration because this bottleneck is an implementation issue and currently has some fixes from other implementation (e,g Apache Spark).
+
 \begin{thebibliography}{9}
 \bibitem{wikidt}
 \textit https://en.wikipedia.org/wiki/Decision\_tree
@@ -890,5 +918,4 @@ Induction of Decision Trees.
  Su, J., \& Zhang, H. (2006, July)
 \textit A fast decision tree learning algorithm. In AAAI (Vol. 6, pp. 500-505).
 \end{thebibliography}
-http://codingwiththomas.blogspot.ca/2011/04/controlling-hadoop-job-recursion.html
 \end{document}
