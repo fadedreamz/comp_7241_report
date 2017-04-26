@@ -494,6 +494,8 @@ The goal is to pick the attribute with maximum information gain.
 
 \subsection{Algorithm}
 
+There are several map and reduce algorithm which slowly builds up the whole algorithm. For the sake of clarity and better understandability, it has been kept seperate. The first part of the algorithm performs the map function necessary for generating the attribute table. This map algorithm is very simple and give in the Algorithm \ref{algo:atmap}. It takes one row and generates the output for each of the attribute within a single input line.
+
 \IncMargin{1em}
 \begin{algorithm}[H]
 \DontPrintSemicolon
@@ -506,6 +508,8 @@ The goal is to pick the attribute with maximum information gain.
 \caption{Attribute Table Mapper\label{algo:atmap}}
 \end{algorithm}
 \DecMargin{1em}
+
+Once the mapper is done generating the intermediate results, reducer perform the reduction. The reduction algorithm used in this report is very straight forward. It Accumulates and perform the count() operation for each ${{attribute\_value,classifier}}$ pair. The algorithm is given by Algorithm \ref{algo:atred} and \ref{algo:atred2}.
 
 \IncMargin{1em}
 \begin{algorithm}[H]
@@ -523,6 +527,8 @@ $count\leftarrow$ 0\;
 \caption{Attribute Table Reducer\label{algo:atred}}
 \end{algorithm}
 \DecMargin{1em}
+
+After reducer redueces the map for each entry, the calculation now focuses on finding the best attibute by inspecting the information
 
 \IncMargin{1em}
 \begin{algorithm}[H]
@@ -556,9 +562,11 @@ calc \Entropy(${a_{j}}$)\;
 calc \InfoGain(${a_{j}}$) = ${(count/all) * Entropy(a_{j})}$\;
 calc \SplitInfoGain(${a_{j}}$) = ${- (count/all) * \log_{2}{(count/all)}}$\;
 \emit(${a_{j}}$,$(InfoGain(a_{j}), SplitInfoGain(a_{j}))$)
-\caption{Attribute Selection Mapper\label{algo:atred}}
+\caption{Attribute Selection Mapper\label{algo:atred2}}
 \end{algorithm}
 \DecMargin{1em}
+
+Algorithm \ref{algo:gratio}
 
 \IncMargin{1em}
 \begin{algorithm}[H]
@@ -809,9 +817,9 @@ throws IOException, InterruptedException {
         }
         float gainRatio = Float.parseFloat(values[2]);
         if (mGain < gainRatio) {
-	mGain = gainRatio;
-	aBest = values[0];
-	mCount = Integer.parseInt(values[1]);
+            mGain = gainRatio;
+            aBest = values[0];
+            mCount = Integer.parseInt(values[1]);
         }
     }
     arg2.write(new Text(aBest), new Text(String.ValueOf(mCount)));
