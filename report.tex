@@ -834,7 +834,7 @@ throws IOException, InterruptedException {
 
 \subsection{Analysis}
 The complexity of the C4.5 algorithm is $\mathcal{O}(mn^{2})$ \cite{complexity}. This is due to the calculation of the information gain.
-The complexity of the MapReduce algorithm can be broken down task by task. We split the n instances on p processors.
+The complexity of the MapReduce algorithm can be broken down job by job. We split the n instances on p processors.
 \ref{algo:atmap} has the complexity $\mathcal{O}(m)$ where $m$ is the number of features and we are mapping on the number of features.
 \ref{algo:atred} has the complexity $\mathcal{O}(\frac{mn}{p})$ where $m$ is the number of features and $n$ is the number of instances since we are mapping on the number of features and iteration on the number of instanes.
 \ref{algo:atred_2} has the complexity $\mathcal{O}(\frac{mn}{p})$ where $m$ is the number of features and $n$ is the number of instances since we are reducing on the number of instances times the number of features.
