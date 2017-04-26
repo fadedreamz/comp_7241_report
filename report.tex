@@ -833,25 +833,26 @@ throws IOException, InterruptedException {
 %end of code
 
 \subsection{Analysis}
-The complexity of the C4.5 algorithm is $\c45$ \cite{complexity}. This is due to the calculation of the information gain.
-The complexity of the MapReduce algorithm can be broken down task by task.
+The complexity of the C4.5 algorithm is $\mathcal{O}(mn^{2})$ \cite{complexity}. This is due to the calculation of the information gain.
+The complexity of the MapReduce algorithm can be broken down task by task. We split the n instances on p processors.
 \ref{algo:atmap} has the complexity $\mathcal{O}(m)$ where $m$ is the number of features and we are mapping on the number of features.
-\ref{algo:atred} has the complexity $\mathcal{O}(mn)$ where $m$ is the number of features and $n$ is the number of instances since we are mapping on the number of features and iteration on the number of instanes.
-\ref{algo:atred_2} has the complexity $\mathcal{O}(mn)$ where $m$ is the number of features and $n$ is the number of instances since we are reducing on the number of instances times the number of features.
-\ref{algo:atmap_2} has the complexity $\mathcal{O}(n)$ where $n$ is the number of instances, this is the complexity of entropy. \cite{complexity}
-\ref{algo:atred_3} has the complexity $\mathcal{O}(n)$ since we are just consuming the reduce from the previous tasks. The list contains only 1 element.
-\ref{algo:atred_4} has the complexity $\mathcal{O}(n)$ since we are just consuming the reduce from the previous tasks and finding the best attribute.
-\ref{algo:atred_5} has the complexity $\mathcal{O}(n)$ since we are just consuming the reduce from the previous tasks. The list contains only 1 element.
-We repeat the the same at worst n
-Parallel Algorithm Time, ${T_{p}}$ = $\mathcal{O}(\frac{n}{p})$
+\ref{algo:atred} has the complexity $\mathcal{O}(\frac{mn}{p})$ where $m$ is the number of features and $n$ is the number of instances since we are mapping on the number of features and iteration on the number of instanes.
+\ref{algo:atred_2} has the complexity $\mathcal{O}(\frac{mn}{p})$ where $m$ is the number of features and $n$ is the number of instances since we are reducing on the number of instances times the number of features.
+\ref{algo:atmap_2} has the complexity $\mathcal{O}(\frac{n}{p})$ where $n$ is the number of instances, this is the complexity of entropy. \cite{complexity}
+\ref{algo:atred_3} has the complexity $\mathcal{O}(\frac{n}{p})$ since we are just consuming the reduce from the previous tasks. The list contains only 1 element.
+\ref{algo:atred_4} has the complexity $\mathcal{O}(\frac{n}{p})$ since we are just consuming the reduce from the previous tasks and finding the best attribute.
+\ref{algo:atred_5} has the complexity $\mathcal{O}(\frac{n}{p})$ since we are just consuming the reduce from the previous tasks. The list contains only 1 element.
+We repeat \ref{algo:atred_2} to\ref{algo:atred_5} n times so in the worst case we have $\mathcal{O}(\frac{mn^{2}}{p})$
 
-Naive Sequential Algorithm, ${T_{s}}$ = $\mathcal{O}(n)$
+\BlankLine Parallel Algorithm Time, ${T_{p}}$ = $\mathcal{O}(\frac{mn^{2}}{p})$
 
-Number of processor, p = $p$
+\BlankLine Naive Sequential Algorithm, ${T_{s}}$ = $\mathcal{O}(mn^{2})$
 
-Speedup, ${S = T_{s}/T_{p}}$ = $\frac{\mathcal{O}(\frac{n}{p})}{\mathcal{O}(n)}$ = $\mathcal{O}(1)$
+\BlankLine Number of processor, p = $p$
 
-Efficiency, ${E = S/p}$ = $\frac{\mathcal{O}(1)}{p}$ = $\mathcal{O}(\frac{1}{p})$
+\BlankLine Speedup, ${S = T_{s}/T_{p}}$ = $\frac{\mathcal{O}(mn^{2})}{\mathcal{O}(\frac{mn^{2}}{p})}$ = $\mathcal{O}(1)$ as $p << N$
+
+\BlankLine Efficiency, ${E = S/p}$ = $\frac{\mathcal{O}(1)}{p}$ = $\mathcal{O}(\frac{1}{p})$ as $p << N$
 
 \subsection{Conclusion}
 
